@@ -159,6 +159,13 @@ WHLClasses
  06/01/2015 - EnvelopeCollection: A structure which acts as a list of envelope objects and also has some methods for handy enveloping.
  </summary>
 </member>
+<member name="M:WHLClasses.MiscFunctions.Misc.PingServerTime(System.String,System.Int32)">
+ <summary>
+ Gets the time taken for a response from a server. Returns -1 tick if no response. Waits maximum of 100ms for a response.
+ </summary>
+ <param name="server">The host you want to ping</param>
+ <returns>Amount of time taken for a response. If there was no response, it returns -1 tick.</returns>
+</member>
 <member name="M:WHLClasses.Totals.GetDailyTotals(System.DateTime)">
  <summary>
  
@@ -208,6 +215,11 @@ WHLClasses
  <param name="MatchAll">Boolean value to make the results match all search terms. Defaults to True. </param>
  <param name="Divider">Set the search term divider. Default is space. </param>
  <returns>A collection of SKUs (in a skucollection) which meets the specified criteria. </returns>
+</member>
+<member name="T:WHLClasses.WhlSKU">
+ <summary>
+ GOOD LUCK WITH THIS ONE. Refertou your comprehensive guide to bad programming for more info on this one.
+ </summary>
 </member>
 <member name="M:WHLClasses.WhlSKU.SaveChanges(WHLClasses.Employee,System.String)">
  <summary>

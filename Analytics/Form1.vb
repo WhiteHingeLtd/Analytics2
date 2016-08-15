@@ -205,32 +205,32 @@ Public Class Form1
             EmpPickingChart.Series.Add("PickingSingle")
             EmpPickingChart.Series.Add("PickingMulti")
             EmpPickingChart.Series.Add("PickingMixed")
-            EmpPickingChart.Series.Add("PickingCourier")
+            'EmpPickingChart.Series.Add("PickingCourier")
 
             EmpPickingChart.Series.Add("PackingSingle")
             EmpPickingChart.Series.Add("PackingMulti")
             EmpPickingChart.Series.Add("PackingMixed")
-            EmpPickingChart.Series.Add("PackingCourier")
+            'EmpPickingChart.Series.Add("PackingCourier")
 
             EmpPickingChart.Series("PickingSingle")("PixelPointWidth") = "40"
             EmpPickingChart.Series("PickingMulti")("PixelPointWidth") = "40"
             EmpPickingChart.Series("PickingMixed")("PixelPointWidth") = "40"
-            EmpPickingChart.Series("PickingCourier")("PixelPointWidth") = "40"
+            'EmpPickingChart.Series("PickingCourier")("PixelPointWidth") = "40"
 
             EmpPickingChart.Series("PackingSingle")("PixelPointWidth") = "40"
             EmpPickingChart.Series("PackingMulti")("PixelPointWidth") = "40"
             EmpPickingChart.Series("PackingMixed")("PixelPointWidth") = "40"
-            EmpPickingChart.Series("PackingCourier")("PixelPointWidth") = "40"
+            'EmpPickingChart.Series("PackingCourier")("PixelPointWidth") = "40"
 
             EmpPickingChart.Series("PickingSingle").ChartType = DataVisualization.Charting.SeriesChartType.Bar
             EmpPickingChart.Series("PickingMulti").ChartType = DataVisualization.Charting.SeriesChartType.Bar
             EmpPickingChart.Series("PickingMixed").ChartType = DataVisualization.Charting.SeriesChartType.Bar
-            EmpPickingChart.Series("PickingCourier").ChartType = DataVisualization.Charting.SeriesChartType.Bar
+            'EmpPickingChart.Series("PickingCourier").ChartType = DataVisualization.Charting.SeriesChartType.Bar
 
             EmpPickingChart.Series("PackingSingle").ChartType = DataVisualization.Charting.SeriesChartType.Bar
             EmpPickingChart.Series("PackingMulti").ChartType = DataVisualization.Charting.SeriesChartType.Bar
             EmpPickingChart.Series("PackingMixed").ChartType = DataVisualization.Charting.SeriesChartType.Bar
-            EmpPickingChart.Series("PackingCourier").ChartType = DataVisualization.Charting.SeriesChartType.Bar
+            'EmpPickingChart.Series("PackingCourier").ChartType = DataVisualization.Charting.SeriesChartType.Bar
         Catch ex As ArgumentException
         End Try
 
@@ -239,12 +239,12 @@ Public Class Form1
             Dim totalPickingSHours As Double = 0
             Dim totalPickingMHours As Double = 0
             Dim totalPickingMMHours As Double = 0
-            Dim totalPickingPFHours As Double = 0
+            'Dim totalPickingPFHours As Double = 0
 
             Dim totalPackingSHours As Double = 0
             Dim totalPackingMHours As Double = 0
             Dim totalPackingMMHours As Double = 0
-            Dim totalPackingPFHours As Double = 0
+            'Dim totalPackingPFHours As Double = 0
 
             Dim ListOfSessions As New List(Of SessionAnalytic)
             For Each day As Date In ListOfDates
@@ -267,8 +267,8 @@ Public Class Form1
                     ElseIf session.Picktype = Orders.ItemPicklistType.MultiMixedFirst Or session.Picktype = Orders.ItemPicklistType.MultiMixedSecond Then
                         totalPickingMMHours += session.TimeSpan.TotalHours
 
-                    ElseIf session.Picktype = Orders.ItemPicklistType.Courier Or session.Picktype = Orders.ItemPicklistType.Resend Then
-                        totalPickingPFHours += session.TimeSpan.TotalHours
+                        'ElseIf session.Picktype = Orders.ItemPicklistType.Courier Or session.Picktype = Orders.ItemPicklistType.Resend Then
+                        '    totalPickingPFHours += session.TimeSpan.TotalHours
 
                     End If
                 Else
@@ -281,8 +281,8 @@ Public Class Form1
                     ElseIf session.Picktype = Orders.ItemPicklistType.MultiMixedFirst Or session.Picktype = Orders.ItemPicklistType.MultiMixedSecond Then
                         totalPackingMMHours += session.TimeSpan.TotalHours
 
-                    ElseIf session.Picktype = Orders.ItemPicklistType.Courier Or session.Picktype = Orders.ItemPicklistType.Resend Then
-                        totalPackingPFHours += session.TimeSpan.TotalHours
+                        'ElseIf session.Picktype = Orders.ItemPicklistType.Courier Or session.Picktype = Orders.ItemPicklistType.Resend Then
+                        '    totalPackingPFHours += session.TimeSpan.TotalHours
 
                     End If
                 End If
@@ -291,12 +291,12 @@ Public Class Form1
             EmpPickingChart.Series("PickingSingle").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPickingSHours)
             EmpPickingChart.Series("PickingMulti").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPickingMHours)
             EmpPickingChart.Series("PickingMixed").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPickingMMHours)
-            EmpPickingChart.Series("PickingCourier").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPickingPFHours)
+            'EmpPickingChart.Series("PickingCourier").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPickingPFHours)
 
             EmpPickingChart.Series("PackingSingle").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPackingSHours)
             EmpPickingChart.Series("PackingMulti").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPackingMHours)
             EmpPickingChart.Series("PackingMixed").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPackingMMHours)
-            EmpPickingChart.Series("PackingCourier").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPackingPFHours)
+            'EmpPickingChart.Series("PackingCourier").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPackingPFHours)
 
         Next
     End Sub
@@ -392,4 +392,6 @@ Public Class Form1
         PickPackSplitRadio.Checked = False
         PicklistSplitRadio.Checked = True
     End Sub
+
+
 End Class
