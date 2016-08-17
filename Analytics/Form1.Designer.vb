@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
-Partial Class Form1
+Partial Class AnalyticsBaseForm
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
@@ -271,7 +271,7 @@ Partial Class Form1
         Me.AverageRadio.Text = "Average"
         Me.AverageRadio.UseVisualStyleBackColor = True
         '
-        'Form1
+        'AnalyticsBaseForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -285,7 +285,7 @@ Partial Class Form1
         Me.Controls.Add(Me.SecondDate)
         Me.Controls.Add(Me.FirstDate)
         Me.Controls.Add(Me.LoadAnalyticsBtn)
-        Me.Name = "Form1"
+        Me.Name = "AnalyticsBaseForm"
         Me.Text = "Warehouse Analytics"
         CType(Me.EmpPickingChart, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Panel1.ResumeLayout(False)

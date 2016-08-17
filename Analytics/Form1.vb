@@ -1,7 +1,7 @@
 ﻿Imports WHLClasses
 Imports WHLClasses.WarehouseAnalytics
 
-Public Class Form1
+Public Class AnalyticsBaseForm
     Dim empsColl As New EmployeeCollection
     Dim LargestValue As Integer = 0
 
@@ -44,13 +44,11 @@ Public Class Form1
 
         End Try
         If NoSplitRadio.Checked = True Then
-            'NoSplit(empStatsList, ListOfDates)
-            SplitByPickList(empStatsList, ListOfDates, "NoSplit")
+            ProcessAnalyticsData(empStatsList, ListOfDates, "NoSplit")
         ElseIf PickPackSplitRadio.Checked = True Then
-            'SplitByPickPack(empStatsList, ListOfDates)
-            SplitByPickList(empStatsList, ListOfDates, "SplitByPT")
+            ProcessAnalyticsData(empStatsList, ListOfDates, "SplitByPT")
         ElseIf PicklistSplitRadio.Checked = True Then
-            SplitByPickList(empStatsList, ListOfDates, "SplitByPL")
+            ProcessAnalyticsData(empStatsList, ListOfDates, "SplitByPL")
         End If
 
         'Mandatory chart setup
@@ -151,74 +149,7 @@ Public Class Form1
 
     End Sub
 
-    Private Sub NoSplit(empStatsList As List(Of EmpStats), ListOfDates As List(Of Date))
-        Try
-            EmpPickingChart.Series.Add("Full Data")
-            EmpPickingChart.Series("Full Data")("PixelPointWidth") = "40"
-            EmpPickingChart.Series("Full Data").ChartType = DataVisualization.Charting.SeriesChartType.Bar
-        Catch ex As ArgumentException
-        End Try
-
-        For Each emp In empStatsList 'For every employee on every day
-
-            Dim totalHours As Double = 0
-
-            Dim ListOfSessions As New List(Of SessionAnalytic)
-            For Each day As Date In ListOfDates
-                Try
-                    For Each session As SessionAnalytic In emp.allSessions(day)
-                        ListOfSessions.Add(session)
-                    Next
-                Catch ex As System.Collections.Generic.KeyNotFoundException
-                End Try
-            Next
-
-            For Each session As SessionAnalytic In ListOfSessions
-                totalHours += session.TimeSpan.TotalHours
-            Next
-            EmpPickingChart.Series("Full Data").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalHours)
-        Next
-    End Sub
-
-    Private Sub SplitByPickPack(empStatsList As List(Of EmpStats), ListOfDates As List(Of Date))
-        Try
-            EmpPickingChart.Series.Add("Picking")
-            EmpPickingChart.Series.Add("Packing")
-            EmpPickingChart.Series("Picking")("PixelPointWidth") = "40"
-            EmpPickingChart.Series("Packing")("PixelPointWidth") = "40"
-            EmpPickingChart.Series("Picking").ChartType = DataVisualization.Charting.SeriesChartType.Bar
-            EmpPickingChart.Series("Packing").ChartType = DataVisualization.Charting.SeriesChartType.Bar
-        Catch ex As ArgumentException
-        End Try
-
-        For Each emp In empStatsList 'For every employee on every day
-
-            Dim totalPickingHours As Double = 0
-            Dim totalPackingHours As Double = 0
-
-            Dim ListOfSessions As New List(Of SessionAnalytic)
-            For Each day As Date In ListOfDates
-                Try
-                    For Each session As SessionAnalytic In emp.allSessions(day)
-                        ListOfSessions.Add(session)
-                    Next
-                Catch ex As System.Collections.Generic.KeyNotFoundException
-                End Try
-            Next
-
-            For Each session As SessionAnalytic In ListOfSessions
-                If session.SessionType = SessionType.Packing Then
-                    totalPackingHours += session.TimeSpan.TotalHours
-                Else
-                    totalPickingHours += session.TimeSpan.TotalHours
-                End If
-            Next
-            EmpPickingChart.Series("Packing").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPackingHours)
-            EmpPickingChart.Series("Picking").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalPickingHours)
-        Next
-    End Sub
-
-    Private Sub SplitByPickList(empStatsList As List(Of EmpStats), ListOfDates As List(Of Date), whatToDo As String)
+    Private Sub ProcessAnalyticsData(empStatsList As List(Of EmpStats), ListOfDates As List(Of Date), whatToDo As String)
         LargestValue = 0
 
         WarehouseStatsTable.Rows.Clear()
@@ -228,22 +159,18 @@ Public Class Form1
             Dim totalPickingSHours As Double = 0
             Dim totalPickingBHours As Double = 0
             Dim totalPickingMHours As Double = 0
-            'Dim totalPickingMMHours As Double = 0
 
             Dim totalPackingSHours As Double = 0
             Dim totalPackingBHours As Double = 0
             Dim totalPackingMHours As Double = 0
-            'Dim totalPackingMMHours As Double = 0
 
             Dim totalPickingSQuantity As Double = 0
             Dim totalPickingBQuantity As Double = 0
             Dim totalPickingMQuantity As Double = 0
-            'Dim totalPickingMMQuantity As Double = 0
 
             Dim totalPackingSQuantity As Double = 0
             Dim totalPackingBQuantity As Double = 0
             Dim totalPackingMQuantity As Double = 0
-            'Dim totalPackingMMQuantity As Double = 0
 
             Dim ListOfSessions As New List(Of SessionAnalytic)
             For Each day As Date In ListOfDates
@@ -359,8 +286,8 @@ Public Class Form1
                     EmpPickingChart.Series.Add("Packing")
                     EmpPickingChart.Series("Picking")("PixelPointWidth") = "40"
                     EmpPickingChart.Series("Packing")("PixelPointWidth") = "40"
-                    EmpPickingChart.Series("Picking").ChartType = DataVisualization.Charting.SeriesChartType.Bar
-                    EmpPickingChart.Series("Packing").ChartType = DataVisualization.Charting.SeriesChartType.Bar
+                    EmpPickingChart.Series("Picking").ChartType = DataVisualization.Charting.SeriesChartType.StackedBar
+                    EmpPickingChart.Series("Packing").ChartType = DataVisualization.Charting.SeriesChartType.StackedBar
                 Catch ex As ArgumentException
                 End Try
                 EmpPickingChart.Series("Packing").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(2).Value + ndgvr.Cells(4).Value + ndgvr.Cells(6).Value)

@@ -33,6 +33,10 @@ Z:\.V5\Documents\Projects\Analytics\Analytics\bin\Debug\WHLClasses.pdb
 Z:\.V5\Documents\Projects\Analytics\Analytics\bin\Debug\WHLClasses.xml
 Z:\.V5\Documents\Projects\Analytics\Analytics\bin\Debug\LinnworksAPI.pdb
 Z:\.V5\Documents\Projects\Analytics\Analytics\obj\Debug\Analytics.vbprojResolveAssemblyReference.cache
-Z:\.V5\Documents\Projects\Analytics\Analytics\obj\Debug\Analytics.Form1.resources
 Z:\.V5\Documents\Projects\Analytics\Analytics\obj\Debug\Analytics.Resources.resources
 Z:\.V5\Documents\Projects\Analytics\Analytics\obj\Debug\Analytics.vbproj.GenerateResource.Cache
+Z:\.V5\Documents\Projects\Analytics\Analytics\obj\Debug\Analytics.AnalyticsBaseForm.resources
+Z:\.V5\Documents\Projects\Analytics\Analytics\bin\Debug\Analytics.exe.manifest
+Z:\.V5\Documents\Projects\Analytics\Analytics\bin\Debug\Analytics.application
+Z:\.V5\Documents\Projects\Analytics\Analytics\obj\Debug\Analytics.exe.manifest
+Z:\.V5\Documents\Projects\Analytics\Analytics\obj\Debug\Analytics.application
