@@ -121,7 +121,7 @@ Public Class AnalyticsBaseForm
                 EmpPickingChart.Series("PackingMulti").Color = Color.Goldenrod
                 EmpPickingChart.Series("PackingMulti").ChartType = chartdisplaytype
             End If
-            If ShowMPackingCheck.Checked = True Then
+            If CheckPrepack.Checked = True Then
                 EmpPickingChart.Series.Add("PrePack")
                 EmpPickingChart.Series("PrePack")("PixelPointWidth") = "40"
                 EmpPickingChart.Series("PrePack").Color = Color.MediumPurple
