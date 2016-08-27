@@ -22,8 +22,8 @@ Partial Class AnalyticsBaseForm
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Dim ChartArea1 As System.Windows.Forms.DataVisualization.Charting.ChartArea = New System.Windows.Forms.DataVisualization.Charting.ChartArea()
-        Dim Legend1 As System.Windows.Forms.DataVisualization.Charting.Legend = New System.Windows.Forms.DataVisualization.Charting.Legend()
+        Dim ChartArea2 As System.Windows.Forms.DataVisualization.Charting.ChartArea = New System.Windows.Forms.DataVisualization.Charting.ChartArea()
+        Dim Legend2 As System.Windows.Forms.DataVisualization.Charting.Legend = New System.Windows.Forms.DataVisualization.Charting.Legend()
         Me.LoadAnalyticsBtn = New System.Windows.Forms.Button()
         Me.FirstDate = New System.Windows.Forms.DateTimePicker()
         Me.SecondDate = New System.Windows.Forms.DateTimePicker()
@@ -32,9 +32,11 @@ Partial Class AnalyticsBaseForm
         Me.EmpPickingChart = New System.Windows.Forms.DataVisualization.Charting.Chart()
         Me.NoSplitRadio = New System.Windows.Forms.RadioButton()
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.CheckPrepack = New System.Windows.Forms.CheckBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.PicklistSplitRadio = New System.Windows.Forms.RadioButton()
         Me.PickPackSplitRadio = New System.Windows.Forms.RadioButton()
+        Me.ShowCumulative = New System.Windows.Forms.CheckBox()
         Me.WarehouseStatsTable = New System.Windows.Forms.DataGridView()
         Me.EmpCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.SinglePickCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -43,15 +45,31 @@ Partial Class AnalyticsBaseForm
         Me.SinglePackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.BoxPackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.MultiPackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.PrepackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.TimeSpentRadio = New System.Windows.Forms.RadioButton()
         Me.TotalRadio = New System.Windows.Forms.RadioButton()
         Me.AverageRadio = New System.Windows.Forms.RadioButton()
+        Me.Panel3 = New System.Windows.Forms.Panel()
+        Me.ShowMPackingCheck = New System.Windows.Forms.CheckBox()
+        Me.ShowBPackingCheck = New System.Windows.Forms.CheckBox()
+        Me.ShowSPackingCheck = New System.Windows.Forms.CheckBox()
+        Me.ShowMPickingCheck = New System.Windows.Forms.CheckBox()
+        Me.ShowBPickingCheck = New System.Windows.Forms.CheckBox()
+        Me.ShowSPickingCheck = New System.Windows.Forms.CheckBox()
+        Me.Label5 = New System.Windows.Forms.Label()
+        Me.Label6 = New System.Windows.Forms.Label()
+        Me.OrdersPerHourLbl = New System.Windows.Forms.Label()
+        Me.WarningPnl = New System.Windows.Forms.Panel()
+        Me.WarningLbl = New System.Windows.Forms.Label()
+        Me.Label7 = New System.Windows.Forms.Label()
         CType(Me.EmpPickingChart, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel1.SuspendLayout()
         CType(Me.WarehouseStatsTable, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel2.SuspendLayout()
+        Me.Panel3.SuspendLayout()
+        Me.WarningPnl.SuspendLayout()
         Me.SuspendLayout()
         '
         'LoadAnalyticsBtn
@@ -65,16 +83,19 @@ Partial Class AnalyticsBaseForm
         '
         'FirstDate
         '
+        Me.FirstDate.Checked = False
         Me.FirstDate.Location = New System.Drawing.Point(226, 11)
+        Me.FirstDate.MinDate = New Date(2016, 8, 4, 0, 0, 0, 0)
         Me.FirstDate.Name = "FirstDate"
-        Me.FirstDate.Size = New System.Drawing.Size(200, 20)
+        Me.FirstDate.Size = New System.Drawing.Size(251, 20)
         Me.FirstDate.TabIndex = 4
         '
         'SecondDate
         '
         Me.SecondDate.Location = New System.Drawing.Point(226, 37)
+        Me.SecondDate.MinDate = New Date(2016, 8, 4, 0, 0, 0, 0)
         Me.SecondDate.Name = "SecondDate"
-        Me.SecondDate.Size = New System.Drawing.Size(200, 20)
+        Me.SecondDate.Size = New System.Drawing.Size(251, 20)
         Me.SecondDate.TabIndex = 5
         '
         'Label2
@@ -97,13 +118,13 @@ Partial Class AnalyticsBaseForm
         '
         'EmpPickingChart
         '
-        ChartArea1.Name = "ChartArea1"
-        Me.EmpPickingChart.ChartAreas.Add(ChartArea1)
-        Legend1.Name = "Legend1"
-        Me.EmpPickingChart.Legends.Add(Legend1)
-        Me.EmpPickingChart.Location = New System.Drawing.Point(432, 12)
+        ChartArea2.Name = "ChartArea1"
+        Me.EmpPickingChart.ChartAreas.Add(ChartArea2)
+        Legend2.Name = "Legend1"
+        Me.EmpPickingChart.Legends.Add(Legend2)
+        Me.EmpPickingChart.Location = New System.Drawing.Point(483, 12)
         Me.EmpPickingChart.Name = "EmpPickingChart"
-        Me.EmpPickingChart.Size = New System.Drawing.Size(1141, 828)
+        Me.EmpPickingChart.Size = New System.Drawing.Size(1090, 828)
         Me.EmpPickingChart.TabIndex = 8
         '
         'NoSplitRadio
@@ -119,14 +140,27 @@ Partial Class AnalyticsBaseForm
         '
         'Panel1
         '
+        Me.Panel1.Controls.Add(Me.CheckPrepack)
         Me.Panel1.Controls.Add(Me.Label1)
         Me.Panel1.Controls.Add(Me.PicklistSplitRadio)
         Me.Panel1.Controls.Add(Me.PickPackSplitRadio)
         Me.Panel1.Controls.Add(Me.NoSplitRadio)
         Me.Panel1.Location = New System.Drawing.Point(15, 63)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(174, 86)
+        Me.Panel1.Size = New System.Drawing.Size(174, 104)
         Me.Panel1.TabIndex = 10
+        '
+        'CheckPrepack
+        '
+        Me.CheckPrepack.AutoSize = True
+        Me.CheckPrepack.Checked = True
+        Me.CheckPrepack.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.CheckPrepack.Location = New System.Drawing.Point(23, 84)
+        Me.CheckPrepack.Name = "CheckPrepack"
+        Me.CheckPrepack.Size = New System.Drawing.Size(122, 17)
+        Me.CheckPrepack.TabIndex = 20
+        Me.CheckPrepack.Text = "Show Prepack Data"
+        Me.CheckPrepack.UseVisualStyleBackColor = True
         '
         'Label1
         '
@@ -159,17 +193,29 @@ Partial Class AnalyticsBaseForm
         Me.PickPackSplitRadio.Text = "Split by Picking / Packing"
         Me.PickPackSplitRadio.UseVisualStyleBackColor = True
         '
+        'ShowCumulative
+        '
+        Me.ShowCumulative.AutoSize = True
+        Me.ShowCumulative.Checked = True
+        Me.ShowCumulative.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.ShowCumulative.Location = New System.Drawing.Point(28, 84)
+        Me.ShowCumulative.Name = "ShowCumulative"
+        Me.ShowCumulative.Size = New System.Drawing.Size(143, 17)
+        Me.ShowCumulative.TabIndex = 19
+        Me.ShowCumulative.Text = "Show single bar on chart"
+        Me.ShowCumulative.UseVisualStyleBackColor = True
+        '
         'WarehouseStatsTable
         '
         Me.WarehouseStatsTable.AllowUserToAddRows = False
         Me.WarehouseStatsTable.AllowUserToDeleteRows = False
         Me.WarehouseStatsTable.AllowUserToResizeRows = False
         Me.WarehouseStatsTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.WarehouseStatsTable.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.EmpCol, Me.SinglePickCol, Me.BoxPickCol, Me.MultiPickCol, Me.SinglePackCol, Me.BoxPackCol, Me.MultiPackCol})
-        Me.WarehouseStatsTable.Location = New System.Drawing.Point(15, 155)
+        Me.WarehouseStatsTable.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.EmpCol, Me.SinglePickCol, Me.BoxPickCol, Me.MultiPickCol, Me.SinglePackCol, Me.BoxPackCol, Me.MultiPackCol, Me.PrepackCol})
+        Me.WarehouseStatsTable.Location = New System.Drawing.Point(15, 303)
         Me.WarehouseStatsTable.Name = "WarehouseStatsTable"
         Me.WarehouseStatsTable.RowHeadersVisible = False
-        Me.WarehouseStatsTable.Size = New System.Drawing.Size(411, 685)
+        Me.WarehouseStatsTable.Size = New System.Drawing.Size(462, 537)
         Me.WarehouseStatsTable.TabIndex = 11
         '
         'EmpCol
@@ -221,15 +267,22 @@ Partial Class AnalyticsBaseForm
         Me.MultiPackCol.ReadOnly = True
         Me.MultiPackCol.Width = 50
         '
+        'PrepackCol
+        '
+        Me.PrepackCol.HeaderText = "PP"
+        Me.PrepackCol.Name = "PrepackCol"
+        Me.PrepackCol.Width = 50
+        '
         'Panel2
         '
+        Me.Panel2.Controls.Add(Me.ShowCumulative)
         Me.Panel2.Controls.Add(Me.Label4)
         Me.Panel2.Controls.Add(Me.TimeSpentRadio)
         Me.Panel2.Controls.Add(Me.TotalRadio)
         Me.Panel2.Controls.Add(Me.AverageRadio)
         Me.Panel2.Location = New System.Drawing.Point(226, 63)
         Me.Panel2.Name = "Panel2"
-        Me.Panel2.Size = New System.Drawing.Size(174, 86)
+        Me.Panel2.Size = New System.Drawing.Size(174, 104)
         Me.Panel2.TabIndex = 13
         '
         'Label4
@@ -271,11 +324,156 @@ Partial Class AnalyticsBaseForm
         Me.AverageRadio.Text = "Average"
         Me.AverageRadio.UseVisualStyleBackColor = True
         '
+        'Panel3
+        '
+        Me.Panel3.Controls.Add(Me.ShowMPackingCheck)
+        Me.Panel3.Controls.Add(Me.ShowBPackingCheck)
+        Me.Panel3.Controls.Add(Me.ShowSPackingCheck)
+        Me.Panel3.Controls.Add(Me.ShowMPickingCheck)
+        Me.Panel3.Controls.Add(Me.ShowBPickingCheck)
+        Me.Panel3.Controls.Add(Me.ShowSPickingCheck)
+        Me.Panel3.Controls.Add(Me.Label5)
+        Me.Panel3.Location = New System.Drawing.Point(15, 173)
+        Me.Panel3.Name = "Panel3"
+        Me.Panel3.Size = New System.Drawing.Size(462, 68)
+        Me.Panel3.TabIndex = 13
+        '
+        'ShowMPackingCheck
+        '
+        Me.ShowMPackingCheck.AutoSize = True
+        Me.ShowMPackingCheck.Checked = True
+        Me.ShowMPackingCheck.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.ShowMPackingCheck.Location = New System.Drawing.Point(335, 46)
+        Me.ShowMPackingCheck.Name = "ShowMPackingCheck"
+        Me.ShowMPackingCheck.Size = New System.Drawing.Size(120, 17)
+        Me.ShowMPackingCheck.TabIndex = 18
+        Me.ShowMPackingCheck.Text = "Show Multi Packing"
+        Me.ShowMPackingCheck.UseVisualStyleBackColor = True
+        '
+        'ShowBPackingCheck
+        '
+        Me.ShowBPackingCheck.AutoSize = True
+        Me.ShowBPackingCheck.Checked = True
+        Me.ShowBPackingCheck.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.ShowBPackingCheck.Location = New System.Drawing.Point(169, 46)
+        Me.ShowBPackingCheck.Name = "ShowBPackingCheck"
+        Me.ShowBPackingCheck.Size = New System.Drawing.Size(128, 17)
+        Me.ShowBPackingCheck.TabIndex = 17
+        Me.ShowBPackingCheck.Text = "Show Boxed Packing"
+        Me.ShowBPackingCheck.UseVisualStyleBackColor = True
+        '
+        'ShowSPackingCheck
+        '
+        Me.ShowSPackingCheck.AutoSize = True
+        Me.ShowSPackingCheck.Checked = True
+        Me.ShowSPackingCheck.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.ShowSPackingCheck.Location = New System.Drawing.Point(4, 46)
+        Me.ShowSPackingCheck.Name = "ShowSPackingCheck"
+        Me.ShowSPackingCheck.Size = New System.Drawing.Size(127, 17)
+        Me.ShowSPackingCheck.TabIndex = 16
+        Me.ShowSPackingCheck.Text = "Show Single Packing"
+        Me.ShowSPackingCheck.UseVisualStyleBackColor = True
+        '
+        'ShowMPickingCheck
+        '
+        Me.ShowMPickingCheck.AutoSize = True
+        Me.ShowMPickingCheck.Checked = True
+        Me.ShowMPickingCheck.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.ShowMPickingCheck.Location = New System.Drawing.Point(335, 23)
+        Me.ShowMPickingCheck.Name = "ShowMPickingCheck"
+        Me.ShowMPickingCheck.Size = New System.Drawing.Size(116, 17)
+        Me.ShowMPickingCheck.TabIndex = 15
+        Me.ShowMPickingCheck.Text = "Show Multi Picking"
+        Me.ShowMPickingCheck.UseVisualStyleBackColor = True
+        '
+        'ShowBPickingCheck
+        '
+        Me.ShowBPickingCheck.AutoSize = True
+        Me.ShowBPickingCheck.Checked = True
+        Me.ShowBPickingCheck.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.ShowBPickingCheck.Location = New System.Drawing.Point(169, 23)
+        Me.ShowBPickingCheck.Name = "ShowBPickingCheck"
+        Me.ShowBPickingCheck.Size = New System.Drawing.Size(124, 17)
+        Me.ShowBPickingCheck.TabIndex = 14
+        Me.ShowBPickingCheck.Text = "Show Boxed Picking"
+        Me.ShowBPickingCheck.UseVisualStyleBackColor = True
+        '
+        'ShowSPickingCheck
+        '
+        Me.ShowSPickingCheck.AutoSize = True
+        Me.ShowSPickingCheck.Checked = True
+        Me.ShowSPickingCheck.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.ShowSPickingCheck.Location = New System.Drawing.Point(4, 23)
+        Me.ShowSPickingCheck.Name = "ShowSPickingCheck"
+        Me.ShowSPickingCheck.Size = New System.Drawing.Size(123, 17)
+        Me.ShowSPickingCheck.TabIndex = 13
+        Me.ShowSPickingCheck.Text = "Show Single Picking"
+        Me.ShowSPickingCheck.UseVisualStyleBackColor = True
+        '
+        'Label5
+        '
+        Me.Label5.AutoSize = True
+        Me.Label5.Location = New System.Drawing.Point(20, 4)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(145, 13)
+        Me.Label5.TabIndex = 12
+        Me.Label5.Text = "Split by Picklist Type Settings"
+        '
+        'Label6
+        '
+        Me.Label6.AutoSize = True
+        Me.Label6.Location = New System.Drawing.Point(12, 244)
+        Me.Label6.Name = "Label6"
+        Me.Label6.Size = New System.Drawing.Size(124, 13)
+        Me.Label6.TabIndex = 14
+        Me.Label6.Text = "Average orders per hour:"
+        '
+        'OrdersPerHourLbl
+        '
+        Me.OrdersPerHourLbl.AutoSize = True
+        Me.OrdersPerHourLbl.Location = New System.Drawing.Point(142, 244)
+        Me.OrdersPerHourLbl.Name = "OrdersPerHourLbl"
+        Me.OrdersPerHourLbl.Size = New System.Drawing.Size(0, 13)
+        Me.OrdersPerHourLbl.TabIndex = 15
+        '
+        'WarningPnl
+        '
+        Me.WarningPnl.BackColor = System.Drawing.Color.Khaki
+        Me.WarningPnl.Controls.Add(Me.WarningLbl)
+        Me.WarningPnl.Location = New System.Drawing.Point(15, 37)
+        Me.WarningPnl.Name = "WarningPnl"
+        Me.WarningPnl.Size = New System.Drawing.Size(121, 19)
+        Me.WarningPnl.TabIndex = 16
+        Me.WarningPnl.Visible = False
+        '
+        'WarningLbl
+        '
+        Me.WarningLbl.Location = New System.Drawing.Point(0, 0)
+        Me.WarningLbl.Name = "WarningLbl"
+        Me.WarningLbl.Size = New System.Drawing.Size(121, 19)
+        Me.WarningLbl.TabIndex = 17
+        Me.WarningLbl.Text = "Click load for new data"
+        Me.WarningLbl.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'Label7
+        '
+        Me.Label7.AutoSize = True
+        Me.Label7.Location = New System.Drawing.Point(22, 287)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(333, 13)
+        Me.Label7.TabIndex = 17
+        Me.Label7.Text = "This table displays the exact numbers shown in the data on the graph"
+        '
         'AnalyticsBaseForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1585, 852)
+        Me.Controls.Add(Me.Label7)
+        Me.Controls.Add(Me.WarningPnl)
+        Me.Controls.Add(Me.OrdersPerHourLbl)
+        Me.Controls.Add(Me.Label6)
+        Me.Controls.Add(Me.Panel3)
         Me.Controls.Add(Me.Panel2)
         Me.Controls.Add(Me.WarehouseStatsTable)
         Me.Controls.Add(Me.Panel1)
@@ -293,6 +491,9 @@ Partial Class AnalyticsBaseForm
         CType(Me.WarehouseStatsTable, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Panel2.ResumeLayout(False)
         Me.Panel2.PerformLayout()
+        Me.Panel3.ResumeLayout(False)
+        Me.Panel3.PerformLayout()
+        Me.WarningPnl.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -311,6 +512,25 @@ Partial Class AnalyticsBaseForm
     Friend WithEvents WarehouseStatsTable As DataGridView
     Friend WithEvents MixedPickCol As DataGridViewTextBoxColumn
     Friend WithEvents MixedPackCol As DataGridViewTextBoxColumn
+    Friend WithEvents Panel2 As Panel
+    Friend WithEvents Label4 As Label
+    Friend WithEvents TimeSpentRadio As RadioButton
+    Friend WithEvents TotalRadio As RadioButton
+    Friend WithEvents AverageRadio As RadioButton
+    Friend WithEvents Panel3 As Panel
+    Friend WithEvents ShowMPackingCheck As CheckBox
+    Friend WithEvents ShowBPackingCheck As CheckBox
+    Friend WithEvents ShowSPackingCheck As CheckBox
+    Friend WithEvents ShowMPickingCheck As CheckBox
+    Friend WithEvents ShowBPickingCheck As CheckBox
+    Friend WithEvents ShowSPickingCheck As CheckBox
+    Friend WithEvents Label5 As Label
+    Friend WithEvents Label6 As Label
+    Friend WithEvents OrdersPerHourLbl As Label
+    Friend WithEvents ShowCumulative As CheckBox
+    Friend WithEvents WarningPnl As Panel
+    Friend WithEvents WarningLbl As Label
+    Friend WithEvents CheckPrepack As CheckBox
     Friend WithEvents EmpCol As DataGridViewTextBoxColumn
     Friend WithEvents SinglePickCol As DataGridViewTextBoxColumn
     Friend WithEvents BoxPickCol As DataGridViewTextBoxColumn
@@ -318,9 +538,6 @@ Partial Class AnalyticsBaseForm
     Friend WithEvents SinglePackCol As DataGridViewTextBoxColumn
     Friend WithEvents BoxPackCol As DataGridViewTextBoxColumn
     Friend WithEvents MultiPackCol As DataGridViewTextBoxColumn
-    Friend WithEvents Panel2 As Panel
-    Friend WithEvents Label4 As Label
-    Friend WithEvents TimeSpentRadio As RadioButton
-    Friend WithEvents TotalRadio As RadioButton
-    Friend WithEvents AverageRadio As RadioButton
+    Friend WithEvents PrepackCol As DataGridViewTextBoxColumn
+    Friend WithEvents Label7 As Label
 End Class
