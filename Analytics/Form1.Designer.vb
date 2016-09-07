@@ -22,8 +22,15 @@ Partial Class AnalyticsBaseForm
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Dim ChartArea2 As System.Windows.Forms.DataVisualization.Charting.ChartArea = New System.Windows.Forms.DataVisualization.Charting.ChartArea()
-        Dim Legend2 As System.Windows.Forms.DataVisualization.Charting.Legend = New System.Windows.Forms.DataVisualization.Charting.Legend()
+        Dim ChartArea1 As System.Windows.Forms.DataVisualization.Charting.ChartArea = New System.Windows.Forms.DataVisualization.Charting.ChartArea()
+        Dim Legend1 As System.Windows.Forms.DataVisualization.Charting.Legend = New System.Windows.Forms.DataVisualization.Charting.Legend()
+        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle6 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle7 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.LoadAnalyticsBtn = New System.Windows.Forms.Button()
         Me.FirstDate = New System.Windows.Forms.DateTimePicker()
         Me.SecondDate = New System.Windows.Forms.DateTimePicker()
@@ -38,14 +45,6 @@ Partial Class AnalyticsBaseForm
         Me.PickPackSplitRadio = New System.Windows.Forms.RadioButton()
         Me.ShowCumulative = New System.Windows.Forms.CheckBox()
         Me.WarehouseStatsTable = New System.Windows.Forms.DataGridView()
-        Me.EmpCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.SinglePickCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.BoxPickCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.MultiPickCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.SinglePackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.BoxPackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.MultiPackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.PrepackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.TimeSpentRadio = New System.Windows.Forms.RadioButton()
@@ -64,6 +63,14 @@ Partial Class AnalyticsBaseForm
         Me.WarningPnl = New System.Windows.Forms.Panel()
         Me.WarningLbl = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
+        Me.EmpCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.SinglePickCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.BoxPickCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.MultiPickCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.SinglePackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.BoxPackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.MultiPackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.PrepackCol = New System.Windows.Forms.DataGridViewTextBoxColumn()
         CType(Me.EmpPickingChart, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel1.SuspendLayout()
         CType(Me.WarehouseStatsTable, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -118,13 +125,16 @@ Partial Class AnalyticsBaseForm
         '
         'EmpPickingChart
         '
-        ChartArea2.Name = "ChartArea1"
-        Me.EmpPickingChart.ChartAreas.Add(ChartArea2)
-        Legend2.Name = "Legend1"
-        Me.EmpPickingChart.Legends.Add(Legend2)
-        Me.EmpPickingChart.Location = New System.Drawing.Point(483, 12)
+        Me.EmpPickingChart.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        ChartArea1.Name = "ChartArea1"
+        Me.EmpPickingChart.ChartAreas.Add(ChartArea1)
+        Legend1.Name = "Legend1"
+        Me.EmpPickingChart.Legends.Add(Legend1)
+        Me.EmpPickingChart.Location = New System.Drawing.Point(483, 2)
         Me.EmpPickingChart.Name = "EmpPickingChart"
-        Me.EmpPickingChart.Size = New System.Drawing.Size(1090, 828)
+        Me.EmpPickingChart.Size = New System.Drawing.Size(1100, 848)
         Me.EmpPickingChart.TabIndex = 8
         '
         'NoSplitRadio
@@ -196,8 +206,6 @@ Partial Class AnalyticsBaseForm
         'ShowCumulative
         '
         Me.ShowCumulative.AutoSize = True
-        Me.ShowCumulative.Checked = True
-        Me.ShowCumulative.CheckState = System.Windows.Forms.CheckState.Checked
         Me.ShowCumulative.Location = New System.Drawing.Point(28, 84)
         Me.ShowCumulative.Name = "ShowCumulative"
         Me.ShowCumulative.Size = New System.Drawing.Size(143, 17)
@@ -210,6 +218,8 @@ Partial Class AnalyticsBaseForm
         Me.WarehouseStatsTable.AllowUserToAddRows = False
         Me.WarehouseStatsTable.AllowUserToDeleteRows = False
         Me.WarehouseStatsTable.AllowUserToResizeRows = False
+        Me.WarehouseStatsTable.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.WarehouseStatsTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.WarehouseStatsTable.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.EmpCol, Me.SinglePickCol, Me.BoxPickCol, Me.MultiPickCol, Me.SinglePackCol, Me.BoxPackCol, Me.MultiPackCol, Me.PrepackCol})
         Me.WarehouseStatsTable.Location = New System.Drawing.Point(15, 303)
@@ -217,61 +227,6 @@ Partial Class AnalyticsBaseForm
         Me.WarehouseStatsTable.RowHeadersVisible = False
         Me.WarehouseStatsTable.Size = New System.Drawing.Size(462, 537)
         Me.WarehouseStatsTable.TabIndex = 11
-        '
-        'EmpCol
-        '
-        Me.EmpCol.HeaderText = "Employee"
-        Me.EmpCol.Name = "EmpCol"
-        Me.EmpCol.ReadOnly = True
-        Me.EmpCol.Width = 107
-        '
-        'SinglePickCol
-        '
-        Me.SinglePickCol.HeaderText = "S-Pi"
-        Me.SinglePickCol.Name = "SinglePickCol"
-        Me.SinglePickCol.ReadOnly = True
-        Me.SinglePickCol.Width = 50
-        '
-        'BoxPickCol
-        '
-        Me.BoxPickCol.HeaderText = "B-Pi"
-        Me.BoxPickCol.Name = "BoxPickCol"
-        Me.BoxPickCol.ReadOnly = True
-        Me.BoxPickCol.Width = 50
-        '
-        'MultiPickCol
-        '
-        Me.MultiPickCol.HeaderText = "M-Pi"
-        Me.MultiPickCol.Name = "MultiPickCol"
-        Me.MultiPickCol.ReadOnly = True
-        Me.MultiPickCol.Width = 50
-        '
-        'SinglePackCol
-        '
-        Me.SinglePackCol.HeaderText = "S-Pa"
-        Me.SinglePackCol.Name = "SinglePackCol"
-        Me.SinglePackCol.ReadOnly = True
-        Me.SinglePackCol.Width = 50
-        '
-        'BoxPackCol
-        '
-        Me.BoxPackCol.HeaderText = "B-Pa"
-        Me.BoxPackCol.Name = "BoxPackCol"
-        Me.BoxPackCol.ReadOnly = True
-        Me.BoxPackCol.Width = 50
-        '
-        'MultiPackCol
-        '
-        Me.MultiPackCol.HeaderText = "M-Pa"
-        Me.MultiPackCol.Name = "MultiPackCol"
-        Me.MultiPackCol.ReadOnly = True
-        Me.MultiPackCol.Width = 50
-        '
-        'PrepackCol
-        '
-        Me.PrepackCol.HeaderText = "PP"
-        Me.PrepackCol.Name = "PrepackCol"
-        Me.PrepackCol.Width = 50
         '
         'Panel2
         '
@@ -463,6 +418,75 @@ Partial Class AnalyticsBaseForm
         Me.Label7.Size = New System.Drawing.Size(333, 13)
         Me.Label7.TabIndex = 17
         Me.Label7.Text = "This table displays the exact numbers shown in the data on the graph"
+        '
+        'EmpCol
+        '
+        Me.EmpCol.HeaderText = "Employee"
+        Me.EmpCol.Name = "EmpCol"
+        Me.EmpCol.ReadOnly = True
+        Me.EmpCol.Width = 107
+        '
+        'SinglePickCol
+        '
+        DataGridViewCellStyle1.Format = "N2"
+        Me.SinglePickCol.DefaultCellStyle = DataGridViewCellStyle1
+        Me.SinglePickCol.HeaderText = "S-Pi"
+        Me.SinglePickCol.Name = "SinglePickCol"
+        Me.SinglePickCol.ReadOnly = True
+        Me.SinglePickCol.Width = 50
+        '
+        'BoxPickCol
+        '
+        DataGridViewCellStyle2.Format = "N2"
+        Me.BoxPickCol.DefaultCellStyle = DataGridViewCellStyle2
+        Me.BoxPickCol.HeaderText = "B-Pi"
+        Me.BoxPickCol.Name = "BoxPickCol"
+        Me.BoxPickCol.ReadOnly = True
+        Me.BoxPickCol.Width = 50
+        '
+        'MultiPickCol
+        '
+        DataGridViewCellStyle3.Format = "N2"
+        Me.MultiPickCol.DefaultCellStyle = DataGridViewCellStyle3
+        Me.MultiPickCol.HeaderText = "M-Pi"
+        Me.MultiPickCol.Name = "MultiPickCol"
+        Me.MultiPickCol.ReadOnly = True
+        Me.MultiPickCol.Width = 50
+        '
+        'SinglePackCol
+        '
+        DataGridViewCellStyle4.Format = "N2"
+        Me.SinglePackCol.DefaultCellStyle = DataGridViewCellStyle4
+        Me.SinglePackCol.HeaderText = "S-Pa"
+        Me.SinglePackCol.Name = "SinglePackCol"
+        Me.SinglePackCol.ReadOnly = True
+        Me.SinglePackCol.Width = 50
+        '
+        'BoxPackCol
+        '
+        DataGridViewCellStyle5.Format = "N2"
+        Me.BoxPackCol.DefaultCellStyle = DataGridViewCellStyle5
+        Me.BoxPackCol.HeaderText = "B-Pa"
+        Me.BoxPackCol.Name = "BoxPackCol"
+        Me.BoxPackCol.ReadOnly = True
+        Me.BoxPackCol.Width = 50
+        '
+        'MultiPackCol
+        '
+        DataGridViewCellStyle6.Format = "N2"
+        Me.MultiPackCol.DefaultCellStyle = DataGridViewCellStyle6
+        Me.MultiPackCol.HeaderText = "M-Pa"
+        Me.MultiPackCol.Name = "MultiPackCol"
+        Me.MultiPackCol.ReadOnly = True
+        Me.MultiPackCol.Width = 50
+        '
+        'PrepackCol
+        '
+        DataGridViewCellStyle7.Format = "N2"
+        Me.PrepackCol.DefaultCellStyle = DataGridViewCellStyle7
+        Me.PrepackCol.HeaderText = "PP"
+        Me.PrepackCol.Name = "PrepackCol"
+        Me.PrepackCol.Width = 50
         '
         'AnalyticsBaseForm
         '
