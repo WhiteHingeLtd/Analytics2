@@ -136,7 +136,7 @@ Public Class AnalyticsBaseForm
             If CheckPrepack.Checked = True Then
                 EmpPickingChart.Series.Add("PrePack")
                 EmpPickingChart.Series("PrePack")("PixelPointWidth") = "20"
-                EmpPickingChart.Series("PrePack").Color = Color.MediumPurple
+                EmpPickingChart.Series("PrePack").Color = Color.Green
                 EmpPickingChart.Series("PrePack").ChartType = chartdisplaytype
             End If
 
@@ -180,7 +180,7 @@ Public Class AnalyticsBaseForm
             If CheckPrepack.Checked = True Then
                 EmpPickingChart.Series.Add("PrePack")
                 EmpPickingChart.Series("PrePack")("PixelPointWidth") = "35"
-                EmpPickingChart.Series("PrePack").Color = Color.MediumPurple
+                EmpPickingChart.Series("PrePack").Color = Color.Green
                 EmpPickingChart.Series("PrePack").ChartType = chartdisplaytype
             End If
             '-----

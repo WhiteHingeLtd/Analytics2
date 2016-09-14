@@ -40,3 +40,4 @@ Z:\.V5\Documents\Projects\Analytics\Analytics\bin\Debug\Analytics.exe.manifest
 Z:\.V5\Documents\Projects\Analytics\Analytics\bin\Debug\Analytics.application
 Z:\.V5\Documents\Projects\Analytics\Analytics\obj\Debug\Analytics.exe.manifest
 Z:\.V5\Documents\Projects\Analytics\Analytics\obj\Debug\Analytics.application
+Z:\.V5\Documents\Projects\Analytics\Analytics\bin\Debug\Newtonsoft.Json.xml
