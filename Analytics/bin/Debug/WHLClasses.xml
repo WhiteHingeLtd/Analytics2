@@ -97,7 +97,7 @@ WHLClasses
  Collection of shifts. You'll need this if you want to display the rota, or let the user do a thing. 
  </summary>
 </member>
-<member name="M:WHLClasses.Fees.FeeManager.GetPostagePrice(System.Int32,System.Boolean,System.Boolean)">
+<member name="M:WHLClasses.Fees.FeeManager.GetPostagePrice(System.Int32,System.Boolean,System.Boolean,System.Boolean)">
  <summary>
  Gets the postage price form whldata.postagecosts for items based on the supplied data. 
  </summary>
@@ -134,6 +134,23 @@ WHLClasses
  <param name="RetailPrice"></param>
  <returns></returns>
 </member>
+<member name="M:WHLClasses.GenericDataController.LoadOrdlst(System.String,System.Boolean,System.Boolean)">
+ <summary>
+ If you're using this, chances are it's in Processed Order Viewer. This has been personalised to deal with its initial loading loop. All are optional, change as needed.
+ </summary>
+ <param name="Filepath"> You shouldn't need to change this unless the order list is placed elsewhere.</param>
+ <param name="ShowStatusDialog"> This is true by default. Basically, it shows the loading progress.</param>
+ <param name="NoCatch"> True by default, because if it fails, we don't want it to crash.</param>
+ <returns></returns>
+</member>
+<member name="M:WHLClasses.Misc.OperationDialog(System.String,System.ComponentModel.DoWorkEventHandler,System.Object)">
+ <summary>
+ Throws up a dialog with a marquee progress bar and some text to signfy a long running operation, and runs it on a different thread.
+ </summary>
+ <param name="DialogText">The text you want the dialog to say.</param>
+ <param name="DialogFunction">The AddressOf the function you want to run. The method must be compatible with the DoWork event handler of BackgroundWorkers.</param>
+ <param name="Param">An argument which can be passed to the threaded task.</param>
+</member>
 <member name="T:WHLClasses.Hardware.WakeOnLan">
  <summary>
  Provides methods and otehr bits for waking PCs over the network.
@@ -154,6 +171,20 @@ WHLClasses
  <param name="NameSearch"></param>
  <returns></returns>
 </member>
+<member name="M:WHLClasses.Linnworks.Orders.ExtendedOrder.AddTrayToList(System.String,System.String)">
+ <summary>
+ Tray tracking. Please add the relevant tray ID followed by the state PICKING, PICKED, PACKING or PACKED.
+ The state will automatically trim and set the string to uppercase letters for you.
+ This will hopefully help in finding the root of order disappearances from trays. Hopefully.
+ </summary>
+ <param name="TrayID"></param>
+ <param name="CurrentState"></param>
+</member>
+<member name="M:WHLClasses.Linnworks.Orders.ExtendedOrder.SetEmailDate">
+ <summary>
+ This will save the current time as the last emailed date.
+ </summary>
+</member>
 <member name="T:WHLClasses.EnvelopeCollection">
  <summary>
  06/01/2015 - EnvelopeCollection: A structure which acts as a list of envelope objects and also has some methods for handy enveloping.
@@ -165,6 +196,155 @@ WHLClasses
  </summary>
  <param name="server">The host you want to ping</param>
  <returns>Amount of time taken for a response. If there was no response, it returns -1 tick.</returns>
+</member>
+<member name="M:WHLClasses.Orders.OrderDefinition.SortByBinrack">
+ <summary>
+ Shitty old sort method. Pls no.
+ </summary>
+</member>
+<member name="M:WHLClasses.Orders.OrderDefinition.SortByNewLocations(WHLClasses.Orders.SortDirection)">
+ <summary>
+ Sorts the orders by the new locations used in the system - Specifically by the Location IDs.
+ </summary>
+ <param name="Direction">Specifies the direction which the orders are sorted in. Defaults to ascending, and you're probably never going to use the descending but the option is there if you need it.</param>
+</member>
+<member name="M:WHLClasses.Orders.OrderDefinition.GetOrdersByWarehouse(System.Int32,System.Boolean)">
+ <summary>
+ Gets orders where the items on the order are in the specified warehouse. Also allows you to filter out ones in another warehouse if you likr.
+ </summary>
+ <param name="WarehouseID">The warehouse ID you want to find orders for</param>
+ <param name="AllowSplits">Whethewr you want to get Split warehouse orders. Defaults to False.</param>
+ <returns></returns>
+</member>
+<member name="M:WHLClasses.Orders.OrderDefinition.GetByOrderID(System.String)">
+ <summary>
+ Find a specific order's data 
+ </summary>
+ <param name="OrderID"></param>
+ <returns></returns>
+</member>
+<member name="M:WHLClasses.Orders.OrderDefinition.GetSplits">
+ <summary>
+ Gets the splits from the current defeinition, which can then be used to find and print the Split Transfer List. TM
+ </summary>
+ <returns>A bunvh of orders which are splits.</returns>
+</member>
+<member name="M:WHLClasses.Orders.OrderDefinition.GetByPickType(WHLClasses.Orders.ItemPicklistType)">
+ <summary>
+ Filters orders and returns thouse which have the specified type of orders within.
+ </summary>
+ <param name="PickingType"></param>
+ <returns></returns>
+</member>
+<member name="M:WHLClasses.Orders.OrderDefinition.GetByStatus(WHLClasses.Orders.OrderStatus)">
+ <summary>
+ Filters orders and returns only those matching the specified OrderStatus.
+ </summary>
+ <param name="Status"></param>
+ <returns></returns>
+</member>
+<member name="M:WHLClasses.Orders.OrderDefinition.GetBoxedOrders(System.Boolean)">
+ <summary>
+ Filters orders and gets only those matching the specified state ofbox... requirement?
+ </summary>
+ <param name="NeedsBox"></param>
+ <returns></returns>
+</member>
+<member name="M:WHLClasses.Services.SurfacePicker.Fucnt.ConnectChannel(System.String,System.ServiceModel.Channels.Binding)">
+ <summary>
+ Creates the connection
+ </summary>
+ <param name="Address">The endpoint of the server to connect to.</param>
+ <param name="Binding">The binding to use. A NetTCPBinding will be useed (with max 2GB message size) if you don't specify anything,.</param>
+ <returns>The client interface, which has the functions you can use.</returns>
+</member>
+<member name="M:WHLClasses.Services.SurfacePicker.SPContract.SetTabletStatus(System.String,System.String,System.Windows.Media.Color,System.String,System.String)">
+ <summary>
+ Sets the status of a tablet on the screen. Adds it if it isn't already there.
+ </summary>
+ <param name="DeviceName">The hostname of the sevice</param>
+ <param name="Username">THe name as you want it to display</param>
+ <param name="Background">The background color, sans gradient/darkening</param>
+ <param name="Type">The type of list they're doing as it shows on the tag. The first character </param>
+ <param name="Status">The taxt which occupies the bottom of the control.</param>
+</member>
+<member name="M:WHLClasses.Services.SurfacePicker.SPContract.RemoveTablet(System.String)">
+ <summary>
+ Removes a tablet from the screen.
+ </summary>
+ <param name="DeviceName"></param>
+</member>
+<member name="M:WHLClasses.Services.SurfacePicker.SPContract.Ping">
+ <summary>
+ Returns true.
+ </summary>
+ <returns></returns>
+</member>
+<member name="M:WHLClasses.Services.Sku_Generator.Fucnt.ConnectChannel(System.String,System.ServiceModel.Channels.Binding)">
+ <summary>
+ Creates the connection
+ </summary>
+ <param name="Address">The endpoint of the server to connect to.</param>
+ <param name="Binding">The binding to use. A NetTCPBinding will be useed (with max 2GB message size) if you don't specify anything,.</param>
+ <returns>The client interface, which has the functions you can use.</returns>
+</member>
+<member name="M:WHLClasses.Services.Sku_Generator.SGContract.GetCollection">
+ <summary>
+ Retirieves the SkuCollection from the server. 
+ </summary>
+ <returns>A fat lump of SkuCollection</returns>
+</member>
+<member name="M:WHLClasses.Services.Sku_Generator.SGContract.PollUpdate">
+ <summary>
+ I'll do this one soon.
+ </summary>
+ <returns></returns>
+</member>
+<member name="M:WHLClasses.Services.OrderServer.Fucnt.ConnectChannel(System.String,System.ServiceModel.Channels.Binding)">
+ <summary>
+ Creates the connection
+ </summary>
+ <param name="Address">The endpoint of the server to connect to.</param>
+ <param name="Binding">The binding to use. A NetTCPBinding will be useed (with max 2GB message size) if you don't specify anything,.</param>
+ <returns>The client interface, which has the functions you can use.</returns>
+</member>
+<member name="M:WHLClasses.Services.OrderServer.OSContract.StreamOrderDefinition">
+ <summary>
+ Hey it actually works™. Gets the Orddef live from the Order Server. Well fast.
+ </summary>
+ <returns>The full orddef LIVE ON CHANNEL FOUR PLEASE DO NOT SWEAR</returns>
+</member>
+<member name="M:WHLClasses.Services.OrderServer.OSContract.StreamIOOrderDefinition">
+ <summary>
+ Hey it actually works™. Gets the IO Orddef live from the Order Server. Well fast. Great for prepacks.
+ </summary>
+ <returns>The full orddef LIVE ON CHANNEL FOUR PLEASE DO NOT SWEAR</returns>
+</member>
+<member name="M:WHLClasses.Services.OrderServer.OSContract.GetOrdersCount(WHLClasses.Orders.OrderStatus)">
+ <summary>
+ Just gets the amount of orders. Optionally lets you say what state you want aforementioned orders to be in.
+ </summary>
+ <param name="OrderState"></param>
+ <returns></returns>
+</member>
+<member name="M:WHLClasses.Services.OrderServer.OSContract.TwoGig">
+ <summary>
+ Downloads 2 gig of data. Ish. 
+ </summary>
+ <returns></returns>
+</member>
+<member name="M:WHLClasses.Services.SvcHost`2.#ctor(System.String,System.String,System.ServiceModel.Channels.Binding)">
+ <summary>
+ Starts a service host with the specified things.
+ </summary>
+ <param name="nServiceAddress">The address of the service</param>
+ <param name="nEndpointAddress">The services' enpoint.</param>
+ <param name="nBinding">The binding to be used.</param>
+</member>
+<member name="M:WHLClasses.Services.SvcHost`2.StopService">
+ <summary>
+ Tries to stop the service.
+ </summary>
 </member>
 <member name="M:WHLClasses.Totals.GetDailyTotals(System.DateTime)">
  <summary>
@@ -200,6 +380,13 @@ WHLClasses
  Contains all of the analytics data used with SurfacePicker
  </summary>
 </member>
+<member name="M:WHLClasses.SkuCollection.SearchLocationIDs(System.Int32)">
+ <summary>
+ Fast function which finds items which have the provided ID
+ </summary>
+ <param name="LocationID"></param>
+ <returns></returns>
+</member>
 <member name="M:WHLClasses.SkuCollection.StartWorker(System.Boolean)">
  <summary>
  Do not run this on the main thread. It is only public for testing purposes.
@@ -215,6 +402,17 @@ WHLClasses
  <param name="MatchAll">Boolean value to make the results match all search terms. Defaults to True. </param>
  <param name="Divider">Set the search term divider. Default is space. </param>
  <returns>A collection of SKUs (in a skucollection) which meets the specified criteria. </returns>
+</member>
+<member name="M:WHLClasses.SkuCollection.FixOrder">
+ <summary>
+ Sorts out the weird ordering provided by racing threads.
+ </summary>
+</member>
+<member name="M:WHLClasses.SkuCollection.MakeMixdown">
+ <summary>
+ Mixes everything down so you only get one packsize per shortsku. Usually the smallest available, I.E. singles.
+ </summary>
+ <returns></returns>
 </member>
 <member name="T:WHLClasses.WhlSKU">
  <summary>
@@ -232,6 +430,13 @@ WHLClasses
  Returns the cheapest supplier object attached to this product.
  </summary>
  <returns></returns>
+</member>
+<member name="M:WHLClasses.WhlSKU.Newbie(System.Collections.ArrayList,System.Boolean)">
+ <summary>
+ Create a WHLSku from a simple arraylist from the whlnew table.
+ </summary>
+ <param name="Data">The arraylist of values from a row.</param>
+ <param name="ThrowRefreshExeptions">Whether or not to throw special exceptions, like if there is nothing in the stock table etc.</param>
 </member>
 <member name="P:WHLClasses.SKUSupplier.CaseBarcodeInner">
  <summary>
@@ -357,6 +562,11 @@ WHLClasses
 </summary>
 </member>
 <member name="P:WHLClasses.My.Resources.Resources.Nouser">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:WHLClasses.My.Resources.Resources.Partyloader">
 <summary>
   Looks up a localized resource of type System.Drawing.Bitmap.
 </summary>

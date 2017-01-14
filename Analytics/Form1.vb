@@ -6,56 +6,44 @@ Public Class AnalyticsBaseForm
     Dim LargestValue As Integer = 0
     Public Auth As New Authentication.AuthClass
 
-    Private Sub LoadData() Handles MyBase.Load
-        NoSplitRadio.Checked = True
-        AverageRadio.Checked = True
+    Private Sub LoadProgram() Handles MyBase.Load
+        LoadVisibleEmps()
+        'That should be it.
     End Sub
 
-    Private Sub LoadAnalyticsBtn_Click(sender As Object, e As EventArgs) Handles LoadAnalyticsBtn.Click
-        HideWarning()
+    'USER OPTIONS
+    Public LoadPickPackData As Boolean = True
+    Public LoadPrepackData As Boolean = True
+
+    Public LoadPickSinglesData As Boolean = True
+    Public LoadPickBoxedData As Boolean = True
+    Public LoadPickMultisData As Boolean = True
+    Public LoadPackSinglesData As Boolean = True
+    Public LoadPackBoxedData As Boolean = True
+    Public LoadPackMultisData As Boolean = True
+
+    Public AllOneBar As Boolean = True 'Graph chart type - one bar or multiple
+
+    Private Sub LoadMultipleDaysBtn_Click(sender As Object, e As EventArgs) Handles LoadMultipleDaysBtn.Click
+
         If Not IsNothing(Auth.AuthenticatedUser) Then
             If Auth.AuthenticatedUser.Permissions.canViewAnalytics Then
                 Dim empStatsList As New List(Of EmpStats)
-                For Each emp As Employee In empsColl.Employees
-                    Dim newEmpStats As EmpStats = GetEmployeeStats(emp.PayrollId) '
+                For Each emp As Employee In GetRelevantEmployees()
+                    'Well if nothing returns, this won't run.
+                    Dim newEmpStats As EmpStats = GetEmployeeStats(emp.PayrollId)
                     If Not newEmpStats Is Nothing Then
                         empStatsList.Add(newEmpStats)
                     End If
                 Next
-                empStatsList.Reverse()
 
-                'So now we have EVERY employee's stats. We have our main loading done. We just need to put it on a graph...
-                'Thankfully, it's not hard to find a tutorial--- Oh, you apply your own references to your copy-pastes? Nope. t(*u*t ) You lost your advertisement rights!
-                'FROM SCRATCH.
-
-                'Neutralise Time.
-                Dim date1str As String = FirstDate.Value.ToString("yyyy/MM/dd")
-                Dim date2str As String = SecondDate.Value.ToString("yyyy/MM/dd")
-                Dim Date1 As Date = date1str
-                Dim Date2 As Date = date2str
-
-                'List of dates, because doing everything else in a while loop is... silly.
-                Dim ListOfDates As New List(Of Date)
-                While Date1 <= Date2
-                    ListOfDates.Add(Date1)
-                    Date1 = Date1.AddDays(1)
-                End While
-
-                'Adding a bar of data to each employee
-                Try
-                    EmpPickingChart.Series.Clear()
-                Catch ex As Exception
-
-                End Try
-                If NoSplitRadio.Checked = True Then
-                    SetUpTables("NoSplit")
-                    ProcessAnalyticsData(empStatsList, ListOfDates, "NoSplit")
-                ElseIf PickPackSplitRadio.Checked = True Then
-                    SetUpTables("SplitByPT")
-                    ProcessAnalyticsData(empStatsList, ListOfDates, "SplitByPT")
-                ElseIf PicklistSplitRadio.Checked = True Then
-                    SetUpTables("SplitByPL")
-                    ProcessAnalyticsData(empStatsList, ListOfDates, "SplitByPL")
+                'Did it work?
+                If empStatsList.Count > 0 Then
+                    'Set stuff up!
+                    SetUpPreProcessing()
+                    ProcessMultiDayAnalyticsData(empStatsList)
+                Else
+                    MsgBox("It looks like those users do not have any analytics data available. If they've never used the system, this makes sense. Otherwise, contact IT, that's a rather concerning issue.")
                 End If
             Else
                 MsgBox("You do not have permission to view analytics data.")
@@ -65,157 +53,164 @@ Public Class AnalyticsBaseForm
             MsgBox("You do not have permission to view analytics data.")
             Auth.LogUserOut()
         End If
-
     End Sub
 
-    Private Sub SetUpTables(whatToDo As String)
+    Dim ListOfDates As New List(Of Date)
+    Private Sub SetUpPreProcessing()
+        'GOOD.
+        'Neutralise our date's time portion
+        Dim date1str As String = FirstDate.Value.ToString("yyyy/MM/dd")
+        Dim date2str As String = SecondDate.Value.ToString("yyyy/MM/dd")
+        Dim Date1 As Date = date1str
+        Dim Date2 As Date = date2str
 
-        WarehouseStatsTable.Rows.Clear()
+        'Get our list of days
+        While Date1 <= Date2
+            ListOfDates.Add(Date1)
+            Date1 = Date1.AddDays(1)
+        End While
+
+        'Get rid of any existing chart data.
+        Try
+            EmpMultiDayPickingChart.Series.Clear()
+        Catch ex As Exception
+        End Try
+        Try
+            WarehouseMultiDayStatsTable.Rows.Clear()
+        Catch ex As Exception
+        End Try
 
         Dim chartdisplaytype As New DataVisualization.Charting.SeriesChartType
-        If ShowCumulative.Checked Then
-            chartdisplaytype = DataVisualization.Charting.SeriesChartType.StackedBar
-        Else
-            chartdisplaytype = DataVisualization.Charting.SeriesChartType.Bar
-        End If
+        chartdisplaytype = DataVisualization.Charting.SeriesChartType.Bar
 
         If TimeSpentRadio.Checked = True Then
             'We want to see employees on a scale to the hour.
-            EmpPickingChart.ChartAreas("ChartArea1").AxisY.Title = "Hours"
-            EmpPickingChart.ChartAreas("ChartArea1").AxisX.Title = "Employee ID"
+            EmpMultiDayPickingChart.ChartAreas("ChartArea1").AxisY.Title = "Hours"
+            EmpMultiDayPickingChart.ChartAreas("ChartArea1").AxisX.Title = "Employee ID"
         ElseIf TotalRadio.Checked = True Then
             'We want to see employees total pick / pack amounts.
-            EmpPickingChart.ChartAreas("ChartArea1").AxisY.Title = "Orders"
-            EmpPickingChart.ChartAreas("ChartArea1").AxisX.Title = "Employee ID"
+            EmpMultiDayPickingChart.ChartAreas("ChartArea1").AxisY.Title = "Orders"
+            EmpMultiDayPickingChart.ChartAreas("ChartArea1").AxisX.Title = "Employee ID"
         ElseIf AverageRadio.Checked = True Then
             'We want to see employees total amounts on average, scaled to the hour.
 
-            EmpPickingChart.ChartAreas("ChartArea1").AxisY.Title = "Orders to the hour"
-            EmpPickingChart.ChartAreas("ChartArea1").AxisX.Title = "Employee ID"
+            EmpMultiDayPickingChart.ChartAreas("ChartArea1").AxisY.Title = "Orders to the hour"
+            EmpMultiDayPickingChart.ChartAreas("ChartArea1").AxisX.Title = "Employee ID"
         End If
 
-        If whatToDo = "SplitByPL" And ShowCumulative.Checked = True Then
-            'This is probably not the best way to view this data
-            If ShowSPickingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PickingSingle")
-                EmpPickingChart.Series("PickingSingle")("PixelPointWidth") = "20"
-                EmpPickingChart.Series("PickingSingle").Color = Color.DeepSkyBlue
-                EmpPickingChart.Series("PickingSingle").ChartType = chartdisplaytype
+        'This is probably not the best way to view this data
+        If PickPackChosen.Checked Then
+            If CheckPickSingle.Checked = True Then
+                EmpMultiDayPickingChart.Series.Add("PickingSingle")
+                EmpMultiDayPickingChart.Series("PickingSingle")("PixelPointWidth") = "20"
+                EmpMultiDayPickingChart.Series("PickingSingle").Color = Color.DeepSkyBlue
+                EmpMultiDayPickingChart.Series("PickingSingle").ChartType = chartdisplaytype
             End If
-            If ShowSPackingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PackingSingle")
-                EmpPickingChart.Series("PackingSingle")("PixelPointWidth") = "20"
-                EmpPickingChart.Series("PackingSingle").Color = Color.RoyalBlue
-                EmpPickingChart.Series("PackingSingle").ChartType = chartdisplaytype
+            If CheckPackSingle.Checked = True Then
+                EmpMultiDayPickingChart.Series.Add("PackingSingle")
+                EmpMultiDayPickingChart.Series("PackingSingle")("PixelPointWidth") = "20"
+                EmpMultiDayPickingChart.Series("PackingSingle").Color = Color.RoyalBlue
+                EmpMultiDayPickingChart.Series("PackingSingle").ChartType = chartdisplaytype
             End If
-            If ShowBPickingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PickingBoxed")
-                EmpPickingChart.Series("PickingBoxed")("PixelPointWidth") = "20"
-                EmpPickingChart.Series("PickingBoxed").Color = Color.Crimson
-                EmpPickingChart.Series("PickingBoxed").ChartType = chartdisplaytype
+            If CheckPickBox.Checked = True Then
+                EmpMultiDayPickingChart.Series.Add("PickingBoxed")
+                EmpMultiDayPickingChart.Series("PickingBoxed")("PixelPointWidth") = "20"
+                EmpMultiDayPickingChart.Series("PickingBoxed").Color = Color.Crimson
+                EmpMultiDayPickingChart.Series("PickingBoxed").ChartType = chartdisplaytype
             End If
-            If ShowBPackingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PackingBoxed")
-                EmpPickingChart.Series("PackingBoxed")("PixelPointWidth") = "20"
-                EmpPickingChart.Series("PackingBoxed").Color = Color.DarkRed
-                EmpPickingChart.Series("PackingBoxed").ChartType = chartdisplaytype
+            If CheckPackBox.Checked = True Then
+                EmpMultiDayPickingChart.Series.Add("PackingBoxed")
+                EmpMultiDayPickingChart.Series("PackingBoxed")("PixelPointWidth") = "20"
+                EmpMultiDayPickingChart.Series("PackingBoxed").Color = Color.DarkRed
+                EmpMultiDayPickingChart.Series("PackingBoxed").ChartType = chartdisplaytype
             End If
-            If ShowMPickingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PickingMulti")
-                EmpPickingChart.Series("PickingMulti")("PixelPointWidth") = "20"
-                EmpPickingChart.Series("PickingMulti").Color = Color.Gold
-                EmpPickingChart.Series("PickingMulti").ChartType = chartdisplaytype
+            If CheckPickMulti.Checked = True Then
+                EmpMultiDayPickingChart.Series.Add("PickingMulti")
+                EmpMultiDayPickingChart.Series("PickingMulti")("PixelPointWidth") = "20"
+                EmpMultiDayPickingChart.Series("PickingMulti").Color = Color.Gold
+                EmpMultiDayPickingChart.Series("PickingMulti").ChartType = chartdisplaytype
             End If
-            If ShowMPackingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PackingMulti")
-                EmpPickingChart.Series("PackingMulti")("PixelPointWidth") = "20"
-                EmpPickingChart.Series("PackingMulti").Color = Color.Goldenrod
-                EmpPickingChart.Series("PackingMulti").ChartType = chartdisplaytype
+            If CheckPackMulti.Checked = True Then
+                EmpMultiDayPickingChart.Series.Add("PackingMulti")
+                EmpMultiDayPickingChart.Series("PackingMulti")("PixelPointWidth") = "20"
+                EmpMultiDayPickingChart.Series("PackingMulti").Color = Color.Goldenrod
+                EmpMultiDayPickingChart.Series("PackingMulti").ChartType = chartdisplaytype
             End If
-            If CheckPrepack.Checked = True Then
-                EmpPickingChart.Series.Add("PrePack")
-                EmpPickingChart.Series("PrePack")("PixelPointWidth") = "20"
-                EmpPickingChart.Series("PrePack").Color = Color.Green
-                EmpPickingChart.Series("PrePack").ChartType = chartdisplaytype
-            End If
-
-        ElseIf whatToDo = "SplitByPL" And ShowCumulative.Checked = False Then
-            If ShowSPickingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PickingSingle")
-                EmpPickingChart.Series("PickingSingle")("PixelPointWidth") = "35"
-                EmpPickingChart.Series("PickingSingle").Color = Color.DeepSkyBlue
-                EmpPickingChart.Series("PickingSingle").ChartType = chartdisplaytype
-            End If
-            If ShowSPackingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PackingSingle")
-                EmpPickingChart.Series("PackingSingle")("PixelPointWidth") = "35"
-                EmpPickingChart.Series("PackingSingle").Color = Color.RoyalBlue
-                EmpPickingChart.Series("PackingSingle").ChartType = chartdisplaytype
-            End If
-            If ShowBPickingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PickingBoxed")
-                EmpPickingChart.Series("PickingBoxed")("PixelPointWidth") = "35"
-                EmpPickingChart.Series("PickingBoxed").Color = Color.Crimson
-                EmpPickingChart.Series("PickingBoxed").ChartType = chartdisplaytype
-            End If
-            If ShowBPackingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PackingBoxed")
-                EmpPickingChart.Series("PackingBoxed")("PixelPointWidth") = "35"
-                EmpPickingChart.Series("PackingBoxed").Color = Color.DarkRed
-                EmpPickingChart.Series("PackingBoxed").ChartType = chartdisplaytype
-            End If
-            If ShowMPickingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PickingMulti")
-                EmpPickingChart.Series("PickingMulti")("PixelPointWidth") = "35"
-                EmpPickingChart.Series("PickingMulti").Color = Color.Gold
-                EmpPickingChart.Series("PickingMulti").ChartType = chartdisplaytype
-            End If
-            If ShowMPackingCheck.Checked = True Then
-                EmpPickingChart.Series.Add("PackingMulti")
-                EmpPickingChart.Series("PackingMulti")("PixelPointWidth") = "35"
-                EmpPickingChart.Series("PackingMulti").Color = Color.Goldenrod
-                EmpPickingChart.Series("PackingMulti").ChartType = chartdisplaytype
-            End If
-            If CheckPrepack.Checked = True Then
-                EmpPickingChart.Series.Add("PrePack")
-                EmpPickingChart.Series("PrePack")("PixelPointWidth") = "35"
-                EmpPickingChart.Series("PrePack").Color = Color.Green
-                EmpPickingChart.Series("PrePack").ChartType = chartdisplaytype
-            End If
-            '-----
-
-        ElseIf whatToDo = "SplitByPT" And ShowCumulative.Checked = True Then
-            EmpPickingChart.Series.Add("Picking")
-            EmpPickingChart.Series.Add("Packing")
-            EmpPickingChart.Series.Add("PrePack")
-            EmpPickingChart.Series("Picking")("PixelPointWidth") = "20"
-            EmpPickingChart.Series("Packing")("PixelPointWidth") = "20"
-            EmpPickingChart.Series("PrePack")("PixelPointWidth") = "20"
-            EmpPickingChart.Series("Picking").ChartType = chartdisplaytype
-            EmpPickingChart.Series("Packing").ChartType = chartdisplaytype
-            EmpPickingChart.Series("PrePack").ChartType = chartdisplaytype
-
-        ElseIf whatToDo = "SplitByPT" And ShowCumulative.Checked = False Then
-            EmpPickingChart.Series.Add("Picking")
-            EmpPickingChart.Series.Add("Packing")
-            EmpPickingChart.Series.Add("PrePack")
-            EmpPickingChart.Series("Picking")("PixelPointWidth") = "35"
-            EmpPickingChart.Series("Packing")("PixelPointWidth") = "35"
-            EmpPickingChart.Series("PrePack")("PixelPointWidth") = "35"
-            EmpPickingChart.Series("Picking").ChartType = chartdisplaytype
-            EmpPickingChart.Series("Packing").ChartType = chartdisplaytype
-            EmpPickingChart.Series("PrePack").ChartType = chartdisplaytype
-            '-----
-
-        ElseIf whatToDo = "NoSplit" Then
-            EmpPickingChart.Series.Add("Full Data")
-            EmpPickingChart.Series("Full Data")("PixelPointWidth") = "35"
-            EmpPickingChart.Series("Full Data").ChartType = DataVisualization.Charting.SeriesChartType.Bar
-
+        ElseIf PrepackChosen.Checked = True Then
+            EmpMultiDayPickingChart.Series.Add("PrePack")
+            EmpMultiDayPickingChart.Series("PrePack")("PixelPointWidth") = "20"
+            EmpMultiDayPickingChart.Series("PrePack").Color = Color.Green
+            EmpMultiDayPickingChart.Series("PrePack").ChartType = chartdisplaytype
         End If
     End Sub
 
-    Private Sub ProcessAnalyticsData(empStatsList As List(Of EmpStats), ListOfDates As List(Of Date), whatToDo As String)
+    Private Sub LoadVisibleEmps(Optional CBList As List(Of CheckBox) = Nothing)
+        If CheckBoxPanel.Controls.Count > 0 Then
+            CheckBoxPanel.Controls.Clear()
+        End If
+
+        Dim verticalBoost As Integer = 4
+        Dim EmpTotal As Integer = 0
+        For Each emp As Employee In empsColl.Employees
+            If emp.Visible = True Then
+                Dim empCheckbox As New CheckBox
+                empCheckbox.Name = "emp" + emp.PayrollId.ToString
+                empCheckbox.Text = "(" + emp.PayrollId.ToString + ") " + emp.FullName
+                AddHandler empCheckbox.CheckedChanged, AddressOf CountEmps
+                EmpTotal += 1
+                Dim newPoint As New Point(4, verticalBoost)
+                verticalBoost += 20
+                CheckBoxPanel.Controls.Add(empCheckbox)
+                CheckBoxPanel.Controls(CheckBoxPanel.Controls.Count - 1).Location = newPoint
+                empCheckbox.Checked = False
+                If Not IsNothing(CBList) Then
+                    For Each CB In CBList
+                        If CB.Name = empCheckbox.Name Then
+                            empCheckbox.Checked = CB.Checked
+                        End If
+                    Next
+                Else
+                End If
+
+                CheckBoxPanel.Controls(CheckBoxPanel.Controls.Count - 1).AutoSize = False
+                CheckBoxPanel.Controls(CheckBoxPanel.Controls.Count - 1).Size = New Size(160, 25)
+            End If
+        Next
+        EmpCountLbl.Text = EmpTotal.ToString
+    End Sub
+
+    Private Function GetRelevantEmployees() As List(Of Employee)
+        Dim newEmpList As New List(Of Employee)
+
+        'If we have controls to work with.
+        If CheckBoxPanel.Controls.Count > 0 Then
+            'Get them all
+            For Each CB As Object In CheckBoxPanel.Controls
+                'Are they checkboxes?
+                If CB.GetType = GetType(CheckBox) Then
+                    'Are they checked?
+                    If CB.Checked Then
+                        'Get our employee ID from our preset text
+                        Dim empID As String = CB.Text.Split(")")(0).Replace("(", "").Replace(")", "")
+                        'Did I do it right?
+                        If IsNumeric(empID) Then
+                            'Lets get our employee
+                            Dim foundEmp As Employee = empsColl.FindEmployeeByID(empID)
+                            'Ensure we got one
+                            If Not IsNothing(foundEmp) Then
+                                'Go
+                                newEmpList.Add(foundEmp)
+                            End If
+                        End If
+                    End If
+                End If
+            Next
+        End If
+        'This can indeed return without anything, this has to be accounted for.
+        Return newEmpList
+    End Function
+
+    Private Sub ProcessMultiDayAnalyticsData(empStatsList As List(Of EmpStats))
         LargestValue = 0
         Dim EveryOrderAmount As Integer = 0
         Dim EveryHourAmount As Double = 0
@@ -244,51 +239,57 @@ Public Class AnalyticsBaseForm
 
             Dim totalPrepackQuantity As Double = 0
 
-            Dim ListOfSessions As New List(Of SessionAnalytic)
+            Dim ListOfPickingSessions As New List(Of SessionAnalytic)
+            Dim ListOfPackingSessions As New List(Of SessionAnalytic)
+            Dim ListOfPrepackSessions As New List(Of SessionAnalytic)
             For Each day As Date In ListOfDates
                 Try
-                    For Each session As SessionAnalytic In emp.allSessions(day)
-                        ListOfSessions.Add(session)
-                    Next
+                    ListOfPickingSessions.AddRange(emp.allSessions(day).Where(Function(SesA As SessionAnalytic) (SesA.SessionType = SessionType.Picking)))
+                Catch ex As System.Collections.Generic.KeyNotFoundException
+                End Try
+                Try
+                    ListOfPackingSessions.AddRange(emp.allSessions(day).Where(Function(SesA As SessionAnalytic) (SesA.SessionType = SessionType.Packing)))
+                Catch ex As System.Collections.Generic.KeyNotFoundException
+                End Try
+                Try
+                    ListOfPrepackSessions.AddRange(emp.allSessions(day).Where(Function(SesA As SessionAnalytic) (SesA.SessionType = SessionType.Prepack)))
                 Catch ex As System.Collections.Generic.KeyNotFoundException
                 End Try
             Next
 
-            For Each session As SessionAnalytic In ListOfSessions
-                If session.SessionType = SessionType.Picking Then
-                    If session.Picktype = Orders.ItemPicklistType.SingleFirst Or session.Picktype = Orders.ItemPicklistType.SingleSecond Then
-                        If session.BoxedOrder Then
-                            totalPickingBHours += session.TimeSpan.TotalHours
-                            totalPickingBQuantity += session.OrderCount
-                        Else
-                            totalPickingSHours += session.TimeSpan.TotalHours
-                            totalPickingSQuantity += session.OrderCount
-                        End If
-
-                    ElseIf session.Picktype = Orders.ItemPicklistType.MultiSameFirst Or session.Picktype = Orders.ItemPicklistType.MultiSameSecond Or session.Picktype = Orders.ItemPicklistType.MultiMixedFirst Or session.Picktype = Orders.ItemPicklistType.MultiMixedSecond Then
-                        totalPickingMHours += session.TimeSpan.TotalHours
-                        totalPickingMQuantity += session.OrderCount
+            For Each session As SessionAnalytic In ListOfPickingSessions
+                If session.Picktype = Orders.ItemPicklistType.SingleFirst Or session.Picktype = Orders.ItemPicklistType.SingleSecond Then
+                    If session.BoxedOrder Then
+                        totalPickingBHours += session.TimeSpan.TotalHours
+                        totalPickingBQuantity += session.OrderCount
+                    Else
+                        totalPickingSHours += session.TimeSpan.TotalHours
+                        totalPickingSQuantity += session.OrderCount
                     End If
-                ElseIf session.SessionType = SessionType.Packing Then
-                    If session.Picktype = Orders.ItemPicklistType.SingleFirst Or session.Picktype = Orders.ItemPicklistType.SingleSecond Then
-                        If session.BoxedOrder Then
-                            totalPackingBHours += session.TimeSpan.TotalHours
-                            totalPackingBQuantity += session.OrderCount
-                        Else
-                            totalPackingSHours += session.TimeSpan.TotalHours
-                            totalPackingSQuantity += session.OrderCount
-                        End If
-
-                    ElseIf session.Picktype = Orders.ItemPicklistType.MultiSameFirst Or session.Picktype = Orders.ItemPicklistType.MultiSameSecond Or session.Picktype = Orders.ItemPicklistType.MultiMixedFirst Or session.Picktype = Orders.ItemPicklistType.MultiMixedSecond Then
-                        totalPackingMHours += session.TimeSpan.TotalHours
-                        totalPackingMQuantity += session.OrderCount
-                    End If
-                ElseIf session.SessionType = SessionType.Prepack Then
-                    If CheckPrepack.Checked Then
-                        totalPrepackHours += session.TimeSpan.TotalHours
-                        totalPrepackQuantity += session.OrderCount
-                    End If
+                ElseIf session.Picktype = Orders.ItemPicklistType.MultiSameFirst Or session.Picktype = Orders.ItemPicklistType.MultiSameSecond Or session.Picktype = Orders.ItemPicklistType.MultiMixedFirst Or session.Picktype = Orders.ItemPicklistType.MultiMixedSecond Then
+                    totalPickingMHours += session.TimeSpan.TotalHours
+                    totalPickingMQuantity += session.OrderCount
                 End If
+            Next
+
+            For Each session As SessionAnalytic In ListOfPackingSessions
+                If session.Picktype = Orders.ItemPicklistType.SingleFirst Or session.Picktype = Orders.ItemPicklistType.SingleSecond Then
+                    If session.BoxedOrder Then
+                        totalPackingBHours += session.TimeSpan.TotalHours
+                        totalPackingBQuantity += session.OrderCount
+                    Else
+                        totalPackingSHours += session.TimeSpan.TotalHours
+                        totalPackingSQuantity += session.OrderCount
+                    End If
+                ElseIf session.Picktype = Orders.ItemPicklistType.MultiSameFirst Or session.Picktype = Orders.ItemPicklistType.MultiSameSecond Or session.Picktype = Orders.ItemPicklistType.MultiMixedFirst Or session.Picktype = Orders.ItemPicklistType.MultiMixedSecond Then
+                    totalPackingMHours += session.TimeSpan.TotalHours
+                    totalPackingMQuantity += session.OrderCount
+                End If
+            Next
+
+            For Each session As SessionAnalytic In ListOfPrepackSessions
+                totalPrepackHours += session.TimeSpan.TotalHours
+                totalPrepackQuantity += session.OrderCount
             Next
 
             Dim empsNumberGatherer As New totalNumberGatherer(totalPickingSHours, totalPickingSQuantity, totalPickingBHours, totalPickingBQuantity, totalPickingMHours, totalPickingMQuantity, totalPackingSHours, totalPackingSQuantity, totalPackingBHours, totalPackingBQuantity, totalPackingMHours, totalPackingMQuantity, totalPrepackHours, totalPrepackQuantity)
@@ -296,191 +297,134 @@ Public Class AnalyticsBaseForm
             '/////ROW CALCULATIONS/////
 
             Dim ndgvr As New DataGridViewRow
-            ndgvr.CreateCells(WarehouseStatsTable)
-            ndgvr.Cells(0).Value = empsColl.FindEmployeeByID(emp.EmpID).FullName
+            ndgvr.CreateCells(WarehouseMultiDayStatsTable)
+            ndgvr.Cells(0).Value = emp.EmpID.ToString + " (" + empsColl.FindEmployeeByID(emp.EmpID).FullName + ")"
 
 
             If TimeSpentRadio.Checked = True Then
-                If totalPickingSHours > 0 And ShowSPickingCheck.Checked = True Then
+                If totalPickingSHours > 0 Then
                     ndgvr.Cells(1).Value = Math.Round(totalPickingSHours, 2)
-                    'EveryOrderAmount += totalPickingSQuantity
-                    'EveryHourAmount += totalPickingSHours
                 Else
                     ndgvr.Cells(1).Value = 0.00
                 End If
 
-                If totalPickingBHours > 0 And ShowBPickingCheck.Checked = True Then
+                If totalPickingBHours > 0 Then
                     ndgvr.Cells(2).Value = Math.Round(totalPickingBHours, 2)
-                    'EveryOrderAmount += totalPickingBQuantity
-                    'EveryHourAmount += totalPickingBHours
                 Else
                     ndgvr.Cells(2).Value = 0.00
                 End If
 
-                If totalPickingMHours > 0 And ShowMPickingCheck.Checked = True Then
+                If totalPickingMHours > 0 Then
                     ndgvr.Cells(3).Value = Math.Round(totalPickingMHours, 2)
-                    'EveryOrderAmount += totalPickingMQuantity
-                    'EveryHourAmount += totalPickingMHours
                 Else
                     ndgvr.Cells(3).Value = 0.00
                 End If
 
-                If totalPackingSHours > 0 And ShowSPackingCheck.Checked = True Then
+                If totalPackingSHours > 0 Then
                     ndgvr.Cells(4).Value = Math.Round(totalPackingSHours, 2)
-                    'EveryOrderAmount += totalPackingSQuantity
-                    'EveryHourAmount += totalPackingSHours
                 Else
                     ndgvr.Cells(4).Value = 0.00
                 End If
 
-                If totalPackingBHours > 0 And ShowBPackingCheck.Checked = True Then
+                If totalPackingBHours > 0 Then
                     ndgvr.Cells(5).Value = Math.Round(totalPackingBHours, 2)
-                    'EveryOrderAmount += totalPackingBQuantity
-                    'EveryHourAmount += totalPackingBHours
                 Else
                     ndgvr.Cells(5).Value = 0.00
                 End If
 
-                If totalPackingMHours > 0 And ShowMPackingCheck.Checked = True Then
+                If totalPackingMHours > 0 Then
                     ndgvr.Cells(6).Value = Math.Round(totalPackingMHours, 2)
-                    'EveryOrderAmount += totalPackingMQuantity
-                    'EveryHourAmount += totalPackingMHours
                 Else
                     ndgvr.Cells(6).Value = 0.00
                 End If
 
-                If totalPrepackHours > 0 And CheckPrepack.Checked = True Then
+                If totalPrepackHours > 0 Then
                     ndgvr.Cells(7).Value = Math.Round(totalPrepackHours, 2)
                 Else
                     ndgvr.Cells(7).Value = 0.00
                 End If
 
-                'ndgvr.Cells(1).Value = Math.Round(totalPickingSHours, 2)
-                'ndgvr.Cells(2).Value = Math.Round(totalPickingBHours, 2)
-                'ndgvr.Cells(3).Value = Math.Round(totalPickingMHours, 2)
-                'ndgvr.Cells(4).Value = Math.Round(totalPackingSHours, 2)
-                'ndgvr.Cells(5).Value = Math.Round(totalPackingBHours, 2)
-                'ndgvr.Cells(6).Value = Math.Round(totalPackingMHours, 2)
-                'ndgvr.Cells(7).Value = Math.Round(totalPrepackHours, 2)
             ElseIf TotalRadio.Checked = True Then
-                If totalPickingSQuantity > 0 And ShowSPickingCheck.Checked = True Then
+                If totalPickingSQuantity > 0 Then
                     ndgvr.Cells(1).Value = Math.Round(totalPickingSQuantity, 2)
-                    'EveryOrderAmount += totalPickingSQuantity
-                    'EveryHourAmount += totalPickingSHours
                 Else
                     ndgvr.Cells(1).Value = 0.00
                 End If
 
-                If totalPickingBQuantity > 0 And ShowBPickingCheck.Checked = True Then
+                If totalPickingBQuantity > 0 Then
                     ndgvr.Cells(2).Value = Math.Round(totalPickingBQuantity, 2)
-                    'EveryOrderAmount += totalPickingBQuantity
-                    'EveryHourAmount += totalPickingBHours
                 Else
                     ndgvr.Cells(2).Value = 0.00
                 End If
 
-                If totalPickingMQuantity > 0 And ShowMPickingCheck.Checked = True Then
+                If totalPickingMQuantity > 0 Then
                     ndgvr.Cells(3).Value = Math.Round(totalPickingMQuantity, 2)
-                    'EveryOrderAmount += totalPickingMQuantity
-                    'EveryHourAmount += totalPickingMHours
                 Else
                     ndgvr.Cells(3).Value = 0.00
                 End If
 
-                If totalPackingSQuantity > 0 And ShowSPackingCheck.Checked = True Then
+                If totalPackingSQuantity > 0 Then
                     ndgvr.Cells(4).Value = Math.Round(totalPackingSQuantity, 2)
-                    'EveryOrderAmount += totalPackingSQuantity
-                    'EveryHourAmount += totalPackingSHours
                 Else
                     ndgvr.Cells(4).Value = 0.00
                 End If
 
-                If totalPackingBQuantity > 0 And ShowBPackingCheck.Checked = True Then
+                If totalPackingBQuantity > 0 Then
                     ndgvr.Cells(5).Value = Math.Round(totalPackingBQuantity, 2)
-                    'EveryOrderAmount += totalPackingBQuantity
-                    'EveryHourAmount += totalPackingBHours
                 Else
                     ndgvr.Cells(5).Value = 0.00
                 End If
 
-                If totalPackingMQuantity > 0 And ShowMPackingCheck.Checked = True Then
+                If totalPackingMQuantity > 0 Then
                     ndgvr.Cells(6).Value = Math.Round(totalPackingMQuantity, 2)
-                    'EveryOrderAmount += totalPackingMQuantity
-                    'EveryHourAmount += totalPackingMHours
                 Else
                     ndgvr.Cells(6).Value = 0.00
                 End If
 
-                If totalPrepackQuantity > 0 And CheckPrepack.Checked = True Then
+                If totalPrepackQuantity > 0 Then
                     ndgvr.Cells(7).Value = Math.Round(totalPrepackQuantity, 2)
-
-                    'EveryOrderAmount += totalPrepackQuantity
-                    'EveryHourAmount += totalPrepackHours
                 Else
                     ndgvr.Cells(7).Value = 0.00
                 End If
-
-                'ndgvr.Cells(1).Value = Math.Round(totalPickingSQuantity, 2)
-                'ndgvr.Cells(2).Value = Math.Round(totalPickingBQuantity, 2)
-                'ndgvr.Cells(3).Value = Math.Round(totalPickingMQuantity, 2)
-                'ndgvr.Cells(4).Value = Math.Round(totalPackingSQuantity, 2)
-                'ndgvr.Cells(5).Value = Math.Round(totalPackingBQuantity, 2)
-                'ndgvr.Cells(6).Value = Math.Round(totalPackingMQuantity, 2)
-                'ndgvr.Cells(7).Value = Math.Round(totalPrepackQuantity, 2)
             ElseIf AverageRadio.Checked = True Then
-                If totalPickingSQuantity > 0 And totalPickingSHours > 0 And ShowSPickingCheck.Checked = True Then
+                If totalPickingSQuantity > 0 And totalPickingSHours > 0 Then
                     ndgvr.Cells(1).Value = Math.Round(totalPickingSQuantity / totalPickingSHours, 2)
-                    'EveryOrderAmount += totalPickingSQuantity
-                    'EveryHourAmount += totalPickingSHours
                 Else
                     ndgvr.Cells(1).Value = 0.00
                 End If
 
-                If totalPickingBQuantity > 0 And totalPickingBHours > 0 And ShowBPickingCheck.Checked = True Then
+                If totalPickingBQuantity > 0 And totalPickingBHours > 0 Then
                     ndgvr.Cells(2).Value = Math.Round(totalPickingBQuantity / totalPickingBHours, 2)
-                    'EveryOrderAmount += totalPickingBQuantity
-                    'EveryHourAmount += totalPickingBHours
                 Else
                     ndgvr.Cells(2).Value = 0.00
                 End If
 
-                If totalPickingMQuantity > 0 And totalPickingMHours > 0 And ShowMPickingCheck.Checked = True Then
+                If totalPickingMQuantity > 0 And totalPickingMHours > 0 Then
                     ndgvr.Cells(3).Value = Math.Round(totalPickingMQuantity / totalPickingMHours, 2)
-                    'EveryOrderAmount += totalPickingMQuantity
-                    'EveryHourAmount += totalPickingMHours
                 Else
                     ndgvr.Cells(3).Value = 0.00
                 End If
 
-                If totalPackingSQuantity > 0 And totalPackingSHours > 0 And ShowSPackingCheck.Checked = True Then
+                If totalPackingSQuantity > 0 And totalPackingSHours > 0 Then
                     ndgvr.Cells(4).Value = Math.Round(totalPackingSQuantity / totalPackingSHours, 2)
-                    'EveryOrderAmount += totalPackingSQuantity
-                    'EveryHourAmount += totalPackingSHours
                 Else
                     ndgvr.Cells(4).Value = 0.00
                 End If
 
-                If totalPackingBQuantity > 0 And totalPackingBHours > 0 And ShowBPackingCheck.Checked = True Then
+                If totalPackingBQuantity > 0 And totalPackingBHours > 0 Then
                     ndgvr.Cells(5).Value = Math.Round(totalPackingBQuantity / totalPackingBHours, 2)
-                    'EveryOrderAmount += totalPackingBQuantity
-                    'EveryHourAmount += totalPackingBHours
                 Else
                     ndgvr.Cells(5).Value = 0.00
                 End If
 
-                If totalPackingMQuantity > 0 And totalPackingMHours > 0 And ShowMPackingCheck.Checked = True Then
+                If totalPackingMQuantity > 0 And totalPackingMHours > 0 Then
                     ndgvr.Cells(6).Value = Math.Round(totalPackingMQuantity / totalPackingMHours, 2)
-                    'EveryOrderAmount += totalPackingMQuantity
-                    'EveryHourAmount += totalPackingMHours
                 Else
                     ndgvr.Cells(6).Value = 0.00
                 End If
 
-                If totalPrepackQuantity > 0 And totalPrepackHours > 0 And CheckPrepack.Checked = True Then
+                If totalPrepackQuantity > 0 And totalPrepackHours > 0 Then
                     ndgvr.Cells(7).Value = Math.Round(totalPrepackQuantity / totalPrepackHours, 2)
-
-                    'EveryOrderAmount += totalPrepackQuantity
-                    'EveryHourAmount += totalPrepackHours
                 Else
                     ndgvr.Cells(7).Value = 0.00
                 End If
@@ -488,143 +432,27 @@ Public Class AnalyticsBaseForm
                 Dim totalHours As Double = totalPickingBHours + totalPickingSHours + totalPickingMHours + totalPackingBHours + totalPackingSHours + totalPackingMHours + totalPrepackHours
                 Dim totalQuantity As Double = totalPickingBQuantity + totalPickingSQuantity + totalPickingMQuantity + totalPackingBQuantity + totalPackingSQuantity + totalPackingMQuantity + totalPrepackQuantity
 
-                Dim newKVP As New KeyValuePair(Of Double, Double)(totalQuantity, totalHours)
-                ndgvr.Tag = newKVP
+                '        Dim newKVP As New KeyValuePair(Of Double, Double)(totalQuantity, totalHours)
+                '        ndgvr.Tag = newKVP
             End If
 
-            '/////DISPLAYING GRAPH DATA/////
-
-            If whatToDo = "SplitByPL" Then
-                If ShowSPickingCheck.Checked = True Then EmpPickingChart.Series("PickingSingle").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(1).Value)
-                If ShowBPickingCheck.Checked = True Then EmpPickingChart.Series("PickingBoxed").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(2).Value)
-                If ShowMPickingCheck.Checked = True Then EmpPickingChart.Series("PickingMulti").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(3).Value)
-                If ShowSPackingCheck.Checked = True Then EmpPickingChart.Series("PackingSingle").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(4).Value)
-                If ShowBPackingCheck.Checked = True Then EmpPickingChart.Series("PackingBoxed").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(5).Value)
-                If ShowMPackingCheck.Checked = True Then EmpPickingChart.Series("PackingMulti").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(6).Value)
-                If CheckPrepack.Checked = True Then EmpPickingChart.Series("PrePack").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(7).Value)
-                Dim totalNum As Double = ndgvr.Cells(1).Value + ndgvr.Cells(2).Value + ndgvr.Cells(3).Value + ndgvr.Cells(4).Value + ndgvr.Cells(5).Value + ndgvr.Cells(6).Value + ndgvr.Cells(7).Value
-                If totalNum > LargestValue Then
-                    LargestValue = totalNum
-                End If
-
-            ElseIf whatToDo = "SplitByPT" Then
-
-                Dim totalNum As Double
-                If AverageRadio.Checked = True Then
-                    If ndgvr.Tag.Key > 0 And ndgvr.Tag.Value > 0 Then
-                        totalNum = Math.Round(ndgvr.Tag.Key / ndgvr.Tag.Value, 2)
-                    Else
-                        totalNum = 0
-                    End If
-
-                    Dim EqPicking As Double = 0.00
-                    Dim EqPacking As Double = 0.00
-                    Dim EqPicking2 As Double = 0.00
-                    Dim EqPacking2 As Double = 0.00
-                    If ShowSPickingCheck.Checked = True Then
-                        EqPicking += empsNumberGatherer.pickSQ
-                        EqPicking2 += empsNumberGatherer.pickSH
-                    End If
-                    If ShowBPickingCheck.Checked = True Then
-                        EqPicking += empsNumberGatherer.pickBQ
-                        EqPicking2 += empsNumberGatherer.pickBH
-                    End If
-                    If ShowMPickingCheck.Checked = True Then
-                        EqPicking += empsNumberGatherer.pickMQ
-                        EqPicking2 += empsNumberGatherer.pickMH
-                    End If
-                    If ShowSPackingCheck.Checked = True Then
-                        EqPacking += empsNumberGatherer.packSQ
-                        EqPacking2 += empsNumberGatherer.packSH
-                    End If
-                    If ShowBPackingCheck.Checked = True Then
-                        EqPacking += empsNumberGatherer.packBQ
-                        EqPacking2 += empsNumberGatherer.packBH
-                    End If
-                    If ShowMPackingCheck.Checked = True Then
-                        EqPacking += empsNumberGatherer.packMQ
-                        EqPacking2 += empsNumberGatherer.packMH
-                    End If
-                    If EqPicking > 0.00 And EqPicking2 > 0.00 Then
-                        EmpPickingChart.Series("Picking").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, EqPicking / EqPicking2)
-                    Else
-                        EmpPickingChart.Series("Picking").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, 0)
-                    End If
-                    If EqPacking > 0.00 And EqPacking2 > 0.00 Then
-                        EmpPickingChart.Series("Packing").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, EqPacking / EqPacking2)
-                    Else
-                        EmpPickingChart.Series("Packing").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, 0)
-                    End If
-                    If CheckPrepack.Checked = True Then EmpPickingChart.Series("PrePack").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(7).Value)
-                Else
-                    totalNum = ndgvr.Cells(1).Value + ndgvr.Cells(2).Value + ndgvr.Cells(3).Value + ndgvr.Cells(4).Value + ndgvr.Cells(5).Value + ndgvr.Cells(6).Value + ndgvr.Cells(7).Value
-                    EmpPickingChart.Series("Picking").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(1).Value + ndgvr.Cells(2).Value + ndgvr.Cells(3).Value)
-                    EmpPickingChart.Series("Packing").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(4).Value + ndgvr.Cells(5).Value + ndgvr.Cells(6).Value)
-                    If CheckPrepack.Checked = True Then EmpPickingChart.Series("PrePack").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(7).Value)
-                End If
-
-                If totalNum > LargestValue Then
-                    LargestValue = totalNum
-                End If
-
-
-            ElseIf whatToDo = "NoSplit" Then
-                Dim totalNum As Double
-                If AverageRadio.Checked = True Then
-                    If ndgvr.Tag.Key > 0 And ndgvr.Tag.Value > 0 Then
-                        totalNum = Math.Round(ndgvr.Tag.Key / ndgvr.Tag.Value, 2)
-                    Else
-                        totalNum = 0
-                    End If
-                Else
-                    totalNum = ndgvr.Cells(1).Value + ndgvr.Cells(2).Value + ndgvr.Cells(3).Value + ndgvr.Cells(4).Value + ndgvr.Cells(5).Value + ndgvr.Cells(6).Value + ndgvr.Cells(7).Value
-                End If
-
-                If totalNum > LargestValue Then
-                    LargestValue = totalNum
-                End If
-                EmpPickingChart.Series("Full Data").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, totalNum)
-
+            If PickPackChosen.Checked = True Then
+                If CheckPickSingle.Checked = True Then EmpMultiDayPickingChart.Series("PickingSingle").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(1).Value)
+                If CheckPickBox.Checked = True Then EmpMultiDayPickingChart.Series("PickingBoxed").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(2).Value)
+                If CheckPickMulti.Checked = True Then EmpMultiDayPickingChart.Series("PickingMulti").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(3).Value)
+                If CheckPackSingle.Checked = True Then EmpMultiDayPickingChart.Series("PackingSingle").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(4).Value)
+                If CheckPackBox.Checked = True Then EmpMultiDayPickingChart.Series("PackingBoxed").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(5).Value)
+                If CheckPackMulti.Checked = True Then EmpMultiDayPickingChart.Series("PackingMulti").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(6).Value)
+            Else
+                If PrepackChosen.Checked = True Then EmpMultiDayPickingChart.Series("PrePack").Points.AddXY(empsColl.FindEmployeeByID(emp.EmpID).FullName, ndgvr.Cells(7).Value)
             End If
 
-            Dim actualtotalquantity As Double = 0
-            Dim actualtotalhours As Double = 0
-            If ShowSPickingCheck.Checked = True Then
-                actualtotalquantity += empsNumberGatherer.pickSQ
-                actualtotalhours += empsNumberGatherer.pickSH
-            End If
-            If ShowBPickingCheck.Checked = True Then
-                actualtotalquantity += empsNumberGatherer.pickBQ
-                actualtotalhours += empsNumberGatherer.pickBH
-            End If
-            If ShowMPickingCheck.Checked = True Then
-                actualtotalquantity += empsNumberGatherer.pickMQ
-                actualtotalhours += empsNumberGatherer.pickMH
-            End If
-            If ShowSPackingCheck.Checked = True Then
-                actualtotalquantity += empsNumberGatherer.packSQ
-                actualtotalhours += empsNumberGatherer.packSH
-            End If
-            If ShowBPackingCheck.Checked = True Then
-                actualtotalquantity += empsNumberGatherer.packBQ
-                actualtotalhours += empsNumberGatherer.packBH
-            End If
-            If ShowMPackingCheck.Checked = True Then
-                actualtotalquantity += empsNumberGatherer.packMQ
-                actualtotalhours += empsNumberGatherer.packMH
-            End If
-            If CheckPrepack.Checked = True Then
-                actualtotalquantity += empsNumberGatherer.prepackQ
-                actualtotalhours += empsNumberGatherer.prepackH
+            Dim totalNum As Double = ndgvr.Cells(1).Value + ndgvr.Cells(2).Value + ndgvr.Cells(3).Value + ndgvr.Cells(4).Value + ndgvr.Cells(5).Value + ndgvr.Cells(6).Value + ndgvr.Cells(7).Value
+            If totalNum > LargestValue Then
+                LargestValue = totalNum
             End If
 
-            EmpTotalDictionary.Add(emp.EmpID, actualtotalquantity)
-            If actualtotalquantity > EmpTotalHighest Then
-                EmpTotalHighest = actualtotalquantity
-            End If
-            EveryOrderAmount += actualtotalquantity
-            EveryHourAmount += actualtotalhours
-            WarehouseStatsTable.Rows.Add(ndgvr)
+            WarehouseMultiDayStatsTable.Rows.Add(ndgvr)
         Next
 
         ''OH MAN I HATE THIS SO MUCH
@@ -634,11 +462,10 @@ Public Class AnalyticsBaseForm
                 If record.Value < ((EmpTotalHighest / 100) * ExcludePercTxt.Text) Then
                     'Dim collectedDataPoints As New List(Of DataVisualization.Charting.DataPoint)
                     '(empsColl.FindEmployeeByID(record.Key).FullName)
-
-                    If whatToDo = "SplitByPL" Then
-                        If ShowSPickingCheck.Checked Then
+                    If PickPackChosen.Checked Then
+                        If CheckPickSingle.Checked Then
                             Try
-                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpPickingChart.Series("PickingSingle").Points
+                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpMultiDayPickingChart.Series("PickingSingle").Points
                                 For Each datapointobject As DataVisualization.Charting.DataPoint In thecoll
                                     If datapointobject.AxisLabel = empsColl.FindEmployeeByID(record.Key).FullName Then
                                         thecoll.Remove(datapointobject)
@@ -650,9 +477,9 @@ Public Class AnalyticsBaseForm
                             End Try
 
                         End If
-                        If ShowSPackingCheck.Checked Then
+                        If CheckPackSingle.Checked Then
                             Try
-                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpPickingChart.Series("PackingSingle").Points
+                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpMultiDayPickingChart.Series("PackingSingle").Points
                                 For Each datapointobject As DataVisualization.Charting.DataPoint In thecoll
                                     If datapointobject.AxisLabel = empsColl.FindEmployeeByID(record.Key).FullName Then
                                         thecoll.Remove(datapointobject)
@@ -663,9 +490,9 @@ Public Class AnalyticsBaseForm
 
                             End Try
                         End If
-                        If ShowBPickingCheck.Checked Then
+                        If CheckPickBox.Checked Then
                             Try
-                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpPickingChart.Series("PickingBoxed").Points
+                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpMultiDayPickingChart.Series("PickingBoxed").Points
                                 For Each datapointobject As DataVisualization.Charting.DataPoint In thecoll
                                     If datapointobject.AxisLabel = empsColl.FindEmployeeByID(record.Key).FullName Then
                                         thecoll.Remove(datapointobject)
@@ -676,9 +503,9 @@ Public Class AnalyticsBaseForm
 
                             End Try
                         End If
-                        If ShowBPackingCheck.Checked Then
+                        If CheckPackBox.Checked Then
                             Try
-                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpPickingChart.Series("PackingBoxed").Points
+                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpMultiDayPickingChart.Series("PackingBoxed").Points
                                 For Each datapointobject As DataVisualization.Charting.DataPoint In thecoll
                                     If datapointobject.AxisLabel = empsColl.FindEmployeeByID(record.Key).FullName Then
                                         thecoll.Remove(datapointobject)
@@ -689,9 +516,9 @@ Public Class AnalyticsBaseForm
 
                             End Try
                         End If
-                        If ShowMPickingCheck.Checked Then
+                        If CheckPickMulti.Checked Then
                             Try
-                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpPickingChart.Series("PickingMulti").Points
+                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpMultiDayPickingChart.Series("PickingMulti").Points
                                 For Each datapointobject As DataVisualization.Charting.DataPoint In thecoll
                                     If datapointobject.AxisLabel = empsColl.FindEmployeeByID(record.Key).FullName Then
                                         thecoll.Remove(datapointobject)
@@ -702,22 +529,9 @@ Public Class AnalyticsBaseForm
 
                             End Try
                         End If
-                        If ShowMPackingCheck.Checked Then
+                        If CheckPackMulti.Checked Then
                             Try
-                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpPickingChart.Series("PackingMulti").Points
-                                For Each datapointobject As DataVisualization.Charting.DataPoint In thecoll
-                                    If datapointobject.AxisLabel = empsColl.FindEmployeeByID(record.Key).FullName Then
-                                        thecoll.Remove(datapointobject)
-                                        'datapointobject = Nothing
-                                    End If
-                                Next
-                            Catch ex As Exception
-
-                            End Try
-                        End If
-                        If CheckPrepack.Checked Then
-                            Try
-                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpPickingChart.Series("PrePack").Points
+                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpMultiDayPickingChart.Series("PackingMulti").Points
                                 For Each datapointobject As DataVisualization.Charting.DataPoint In thecoll
                                     If datapointobject.AxisLabel = empsColl.FindEmployeeByID(record.Key).FullName Then
                                         thecoll.Remove(datapointobject)
@@ -730,9 +544,9 @@ Public Class AnalyticsBaseForm
                         End If
 
 
-                    ElseIf whatToDo = "SplitByPT" Then
+                    ElseIf PrepackChosen.Checked Then
                         Try
-                            Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpPickingChart.Series("Picking").Points
+                            Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpMultiDayPickingChart.Series("PrePack").Points
                             For Each datapointobject As DataVisualization.Charting.DataPoint In thecoll
                                 If datapointobject.AxisLabel = empsColl.FindEmployeeByID(record.Key).FullName Then
                                     thecoll.Remove(datapointobject)
@@ -742,52 +556,14 @@ Public Class AnalyticsBaseForm
                         Catch ex As Exception
 
                         End Try
-                        Try
-                            Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpPickingChart.Series("Packing").Points
-                            For Each datapointobject As DataVisualization.Charting.DataPoint In thecoll
-                                If datapointobject.AxisLabel = empsColl.FindEmployeeByID(record.Key).FullName Then
-                                    thecoll.Remove(datapointobject)
-                                    'datapointobject = Nothing
-                                End If
-                            Next
-                        Catch ex As Exception
-
-                        End Try
-                        If CheckPrepack.Checked Then
-                            Try
-                                Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpPickingChart.Series("Prepack").Points
-                                For Each datapointobject As DataVisualization.Charting.DataPoint In thecoll
-                                    If datapointobject.AxisLabel = empsColl.FindEmployeeByID(record.Key).FullName Then
-                                        thecoll.Remove(datapointobject)
-                                        'datapointobject = Nothing
-                                    End If
-                                Next
-                            Catch ex As Exception
-
-                            End Try
-                        End If
-
-
-                    ElseIf whatToDo = "NoSplit" Then
-                        Try
-                            Dim thecoll As DataVisualization.Charting.DataPointCollection = EmpPickingChart.Series("Full Data").Points
-                            For Each datapointobject As DataVisualization.Charting.DataPoint In thecoll
-                                If datapointobject.AxisLabel = empsColl.FindEmployeeByID(record.Key).FullName Then
-                                    thecoll.Remove(datapointobject)
-                                    'datapointobject = Nothing
-                                End If
-                            Next
-                        Catch ex As Exception
-
-                        End Try
-                        'EmpPickingChart.Series("Full Data").Points.
                     End If
+
                 End If
             Next
         End If
 
-        EmpPickingChart.ChartAreas("ChartArea1").AxisY.Interval = (Math.Round(LargestValue / 20) / 10) * 10
-        EmpPickingChart.ChartAreas("ChartArea1").AxisX.Interval = 0.5
+        EmpMultiDayPickingChart.ChartAreas("ChartArea1").AxisY.Interval = (Math.Round(LargestValue / 20) / 10) * 10
+        EmpMultiDayPickingChart.ChartAreas("ChartArea1").AxisX.Interval = 0.5
 
         If EveryHourAmount > 0 Then
             OrdersPerHourLbl.Text = (Math.Round(EveryOrderAmount / EveryHourAmount, 0)).ToString + " orders per hour."
@@ -841,63 +617,77 @@ Public Class AnalyticsBaseForm
         Return Nothing
     End Function
 
-    Private Sub NoSplitRadio_CheckedChanged(sender As Object, e As EventArgs) Handles NoSplitRadio.Click
-        PickPackSplitRadio.Checked = False
-        PicklistSplitRadio.Checked = False
-        NoSplitRadio.Checked = True
-        ShowWarning()
-    End Sub
-
-    Private Sub PickPackSplitRadio_CheckedChanged(sender As Object, e As EventArgs) Handles PickPackSplitRadio.Click
-        NoSplitRadio.Checked = False
-        PicklistSplitRadio.Checked = False
-        PickPackSplitRadio.Checked = True
-        ShowWarning()
-    End Sub
-
-    Private Sub PicklistSplitRadio_CheckedChanged(sender As Object, e As EventArgs) Handles PicklistSplitRadio.Click
-        NoSplitRadio.Checked = False
-        PickPackSplitRadio.Checked = False
-        PicklistSplitRadio.Checked = True
-        ShowWarning()
-    End Sub
-
-    Private Sub AverageRadio_CheckedChanged(sender As Object, e As EventArgs) Handles AverageRadio.Click
-        TotalRadio.Checked = False
-        TimeSpentRadio.Checked = False
-        AverageRadio.Checked = True
-        ShowWarning()
-    End Sub
-
-    Private Sub TotalRadio_CheckedChanged(sender As Object, e As EventArgs) Handles TotalRadio.Click
-        AverageRadio.Checked = False
-        TimeSpentRadio.Checked = False
-        TotalRadio.Checked = True
-        ShowWarning()
-    End Sub
-
-    Private Sub TimeSpentRadio_CheckedChanged(sender As Object, e As EventArgs) Handles TimeSpentRadio.Click
-        AverageRadio.Checked = False
-        TotalRadio.Checked = False
-        TimeSpentRadio.Checked = True
-        ShowWarning()
-    End Sub
-
-    Private Sub ShowSPickingCheck_CheckedChanged(sender As Object, e As EventArgs) Handles CheckPrepack.CheckedChanged, ShowCumulative.CheckedChanged, ShowSPickingCheck.CheckedChanged, ShowBPickingCheck.CheckedChanged, ShowMPickingCheck.CheckedChanged, ShowSPackingCheck.CheckedChanged, ShowBPackingCheck.CheckedChanged, ShowMPackingCheck.CheckedChanged, ExcludePercCheck.CheckedChanged, ExcludePercTxt.TextChanged
-        ShowWarning()
-    End Sub
-
-    Private Sub ShowWarning()
-        WarningPnl.Visible = True
-    End Sub
-
-    Private Sub HideWarning()
-        WarningPnl.Visible = False
-    End Sub
-
     Private Sub ExcludePercTxt_TextChanged(sender As Object, e As EventArgs) Handles ExcludePercTxt.LostFocus
         If Not IsNumeric(ExcludePercTxt.Text) Then
             ExcludePercTxt.Text = "2"
         End If
     End Sub
+
+    Private Sub AllEmpsBtn_Click(sender As Object, e As EventArgs) Handles AllEmpsBtn.Click
+        For Each CB As CheckBox In CheckBoxPanel.Controls
+            CB.Checked = True
+        Next
+    End Sub
+    Private Sub NoEmpsBtn_Click(sender As Object, e As EventArgs) Handles NoEmpsBtn.Click
+        For Each CB As CheckBox In CheckBoxPanel.Controls
+            CB.Checked = False
+        Next
+    End Sub
+    Private Sub CountEmps()
+        Dim TotalEmpsChecked As Integer = 0
+        For Each CB As CheckBox In CheckBoxPanel.Controls
+            If CB.Checked Then TotalEmpsChecked += 1
+        Next
+        EmpSelectedLbl.Text = TotalEmpsChecked.ToString
+    End Sub
+
+    Private Sub RefreshEmpsBtn_Click(sender As Object, e As EventArgs) Handles RefreshEmpsBtn.Click
+        Dim ControlList As New List(Of CheckBox)
+        For Each ctrlObj As Control In CheckBoxPanel.Controls
+            If ctrlObj.GetType = GetType(CheckBox) Then
+                ControlList.Add(ctrlObj)
+            End If
+        Next
+        LoadVisibleEmps(ControlList)
+    End Sub
+
+    Private Sub PickPackChosen_CheckedChanged(sender As Object, e As EventArgs) Handles PickPackChosen.Click
+        LoadPickPackData = True
+        PickPackPanel.Enabled = True
+
+        LoadPrepackData = False
+        PrepackPanel.Enabled = False
+    End Sub
+    Private Sub PrepackChosen_CheckedChanged(sender As Object, e As EventArgs) Handles PrepackChosen.Click
+        LoadPickPackData = False
+        PickPackPanel.Enabled = False
+
+        LoadPrepackData = True
+        PrepackPanel.Enabled = True
+    End Sub
+
+    Private Sub CheckPickSingle_CheckedChanged(sender As Object, e As EventArgs) Handles CheckPickSingle.CheckedChanged
+        LoadPickSinglesData = CheckPickSingle.Checked
+    End Sub
+
+    Private Sub CheckPickBox_CheckedChanged(sender As Object, e As EventArgs) Handles CheckPickBox.CheckedChanged
+        LoadPickBoxedData = CheckPickBox.Checked
+    End Sub
+
+    Private Sub CheckPickMulti_CheckedChanged(sender As Object, e As EventArgs) Handles CheckPickMulti.CheckedChanged
+        LoadPickMultisData = CheckPickMulti.Checked
+    End Sub
+
+    Private Sub CheckPackSingle_CheckedChanged(sender As Object, e As EventArgs) Handles CheckPackSingle.CheckedChanged
+        LoadPackSinglesData = CheckPackSingle.Checked
+    End Sub
+
+    Private Sub CheckPackBox_CheckedChanged(sender As Object, e As EventArgs) Handles CheckPackBox.CheckedChanged
+        LoadPackBoxedData = CheckPackBox.Checked
+    End Sub
+
+    Private Sub CheckPackMulti_CheckedChanged(sender As Object, e As EventArgs) Handles CheckPackMulti.CheckedChanged
+        LoadPackMultisData = CheckPackMulti.Checked
+    End Sub
+
 End Class

@@ -102,6 +102,12 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EmpChartControl.Designer.vb">
+      <DependentUpon>EmpChartControl.vb</DependentUpon>
+    </Compile>
+    <Compile Include="EmpChartControl.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="EmpStats.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
@@ -128,6 +134,9 @@
     <Compile Include="totalNumberGatherer.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="EmpChartControl.resx">
+      <DependentUpon>EmpChartControl.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.vb</DependentUpon>
     </EmbeddedResource>
@@ -154,12 +163,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Z:\.V5\Documents\Projects\Framework\Framework\Framework.vbproj">
-      <Project>{8a2b93b9-4651-40f3-bbf9-d8fd0474a719}</Project>
-      <Name>Framework</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
@@ -170,6 +173,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Framework\Framework.vbproj">
+      <Project>{8a2b93b9-4651-40f3-bbf9-d8fd0474a719}</Project>
+      <Name>Framework</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -64,3 +64,5 @@ Z:\Folders\Documents\Projects\Analytics2\Analytics\obj\Debug\Analytics.Resources
 Z:\Folders\Documents\Projects\Analytics2\Analytics\obj\Debug\Analytics.vbproj.GenerateResource.Cache
 Z:\Folders\Documents\Projects\Analytics2\Analytics\obj\Debug\Analytics.exe.manifest
 Z:\Folders\Documents\Projects\Analytics2\Analytics\obj\Debug\Analytics.application
+Z:\Folders\Documents\Projects\Analytics2\Analytics\bin\Debug\Newtonsoft.Json.xml
+Z:\Folders\Documents\Projects\Analytics2\Analytics\obj\Debug\Analytics.EmpChartControl.resources
