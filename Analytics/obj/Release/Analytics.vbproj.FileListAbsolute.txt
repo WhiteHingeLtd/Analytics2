@@ -1,1 +1,0 @@
-Z:\.V5\Documents\Projects\Analytics\Analytics\bin\Release\Analytics.exe.config
