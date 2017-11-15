@@ -64,16 +64,22 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>CF402AAF1F35AC9874E92D7B62DC08D726054F7A</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>BC21427865220AE1A01BDD8986B54E790480BF9A</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>Analytics_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>SPC.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>SPC.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -152,12 +158,7 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="Z:\.V5\Documents\Projects\Framework\Framework\Framework.vbproj">
-      <Project>{8a2b93b9-4651-40f3-bbf9-d8fd0474a719}</Project>
-      <Name>Framework</Name>
-    </ProjectReference>
+    <None Include="SPC.pfx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -170,6 +171,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Framework\Framework.vbproj">
+      <Project>{8a2b93b9-4651-40f3-bbf9-d8fd0474a719}</Project>
+      <Name>Framework</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
